@@ -5,7 +5,45 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Workforce Intelligence Studio — Board Analytics</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.sheetjs.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://cdn.sheetjs.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; font-src 'self' data:;">
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" crossorigin="anonymous" onerror="loadSheetJSFallback()"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js" crossorigin="anonymous" onerror="loadSheetJSFallback()">
+/* Movement tracker interaction repair: close cleanly and open the selected 360° dossier above it. */
+(function(){
+  const priorTable = window.movementTable || movementTable;
+  window.movementTable = function(rows,type){
+    const cache=__movementCache[type]||[];
+    const cols=['Code','Name','Designation','Department','Grade','Sex','DOJ'];
+    if(!rows.length)return `<div class="empty">No employees found in this movement group.</div>`;
+    return `<div class="movement-list"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Profile</th></tr></thead><tbody>${rows.map(r=>{
+      const idx=cache.indexOf(r);
+      return `<tr class="clickable-row"><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${esc(r.Sex||'—')}</td><td>${r.DOJ instanceof Date?dateStr(r.DOJ):esc(r.DOJ||'—')}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  };
+  window.openMovementEmployee=function(type,index){
+    const row=(__movementCache[type]||[])[Number(index)];
+    if(!row){toast('Employee record could not be located. Please refresh the movement list.');return;}
+    const movement=document.getElementById('movementModal');
+    const profile=document.getElementById('profileModal');
+    if(movement)movement.classList.remove('open');
+    if(typeof showProfile==='function')showProfile(row);
+    else if(typeof openProfile==='function')openProfile(row);
+    if(profile){profile.style.zIndex='100001';profile.classList.add('open');}
+  };
+  window.closeMovementTracker=function(){
+    const modal=document.getElementById('movementModal');
+    if(modal){modal.classList.remove('open');modal.style.display='none';}
+  };
+  document.addEventListener('click',function(e){
+    const close=e.target.closest('#movementModal .close-x');
+    if(close){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.closeMovementTracker();return;}
+    const profile=e.target.closest('#movementModal .wis-movement-profile');
+    if(profile){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementEmployee(profile.dataset.movementType,profile.dataset.movementIndex);}
+  },true);
+  const css=document.createElement('style');
+  css.textContent='#movementModal .close-x{z-index:5;pointer-events:auto;cursor:pointer}#profileModal{z-index:100001!important}#profileModal.open{display:flex!important}';
+  document.head.appendChild(css);
+})();
+
+</script>
 <script>
 /* Excel reader fallback: some office networks block the primary SheetJS CDN. */
 function loadSheetJSFallback(){
@@ -18,9 +56,123 @@ function loadSheetJSFallback(){
   s.onerror=function(){window.__sheetJSLoadFailed=true;};
   document.head.appendChild(s);
 }
+
+/* Movement tracker interaction repair: close cleanly and open the selected 360° dossier above it. */
+(function(){
+  const priorTable = window.movementTable || movementTable;
+  window.movementTable = function(rows,type){
+    const cache=__movementCache[type]||[];
+    const cols=['Code','Name','Designation','Department','Grade','Sex','DOJ'];
+    if(!rows.length)return `<div class="empty">No employees found in this movement group.</div>`;
+    return `<div class="movement-list"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Profile</th></tr></thead><tbody>${rows.map(r=>{
+      const idx=cache.indexOf(r);
+      return `<tr class="clickable-row"><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${esc(r.Sex||'—')}</td><td>${r.DOJ instanceof Date?dateStr(r.DOJ):esc(r.DOJ||'—')}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  };
+  window.openMovementEmployee=function(type,index){
+    const row=(__movementCache[type]||[])[Number(index)];
+    if(!row){toast('Employee record could not be located. Please refresh the movement list.');return;}
+    const movement=document.getElementById('movementModal');
+    const profile=document.getElementById('profileModal');
+    if(movement)movement.classList.remove('open');
+    if(typeof showProfile==='function')showProfile(row);
+    else if(typeof openProfile==='function')openProfile(row);
+    if(profile){profile.style.zIndex='100001';profile.classList.add('open');}
+  };
+  window.closeMovementTracker=function(){
+    const modal=document.getElementById('movementModal');
+    if(modal){modal.classList.remove('open');modal.style.display='none';}
+  };
+  document.addEventListener('click',function(e){
+    const close=e.target.closest('#movementModal .close-x');
+    if(close){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.closeMovementTracker();return;}
+    const profile=e.target.closest('#movementModal .wis-movement-profile');
+    if(profile){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementEmployee(profile.dataset.movementType,profile.dataset.movementIndex);}
+  },true);
+  const css=document.createElement('style');
+  css.textContent='#movementModal .close-x{z-index:5;pointer-events:auto;cursor:pointer}#profileModal{z-index:100001!important}#profileModal.open{display:flex!important}';
+  document.head.appendChild(css);
+})();
+
 </script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" crossorigin="anonymous">
+/* Movement tracker interaction repair: close cleanly and open the selected 360° dossier above it. */
+(function(){
+  const priorTable = window.movementTable || movementTable;
+  window.movementTable = function(rows,type){
+    const cache=__movementCache[type]||[];
+    const cols=['Code','Name','Designation','Department','Grade','Sex','DOJ'];
+    if(!rows.length)return `<div class="empty">No employees found in this movement group.</div>`;
+    return `<div class="movement-list"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Profile</th></tr></thead><tbody>${rows.map(r=>{
+      const idx=cache.indexOf(r);
+      return `<tr class="clickable-row"><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${esc(r.Sex||'—')}</td><td>${r.DOJ instanceof Date?dateStr(r.DOJ):esc(r.DOJ||'—')}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  };
+  window.openMovementEmployee=function(type,index){
+    const row=(__movementCache[type]||[])[Number(index)];
+    if(!row){toast('Employee record could not be located. Please refresh the movement list.');return;}
+    const movement=document.getElementById('movementModal');
+    const profile=document.getElementById('profileModal');
+    if(movement)movement.classList.remove('open');
+    if(typeof showProfile==='function')showProfile(row);
+    else if(typeof openProfile==='function')openProfile(row);
+    if(profile){profile.style.zIndex='100001';profile.classList.add('open');}
+  };
+  window.closeMovementTracker=function(){
+    const modal=document.getElementById('movementModal');
+    if(modal){modal.classList.remove('open');modal.style.display='none';}
+  };
+  document.addEventListener('click',function(e){
+    const close=e.target.closest('#movementModal .close-x');
+    if(close){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.closeMovementTracker();return;}
+    const profile=e.target.closest('#movementModal .wis-movement-profile');
+    if(profile){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementEmployee(profile.dataset.movementType,profile.dataset.movementIndex);}
+  },true);
+  const css=document.createElement('style');
+  css.textContent='#movementModal .close-x{z-index:5;pointer-events:auto;cursor:pointer}#profileModal{z-index:100001!important}#profileModal.open{display:flex!important}';
+  document.head.appendChild(css);
+})();
+
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous">
+/* Movement tracker interaction repair: close cleanly and open the selected 360° dossier above it. */
+(function(){
+  const priorTable = window.movementTable || movementTable;
+  window.movementTable = function(rows,type){
+    const cache=__movementCache[type]||[];
+    const cols=['Code','Name','Designation','Department','Grade','Sex','DOJ'];
+    if(!rows.length)return `<div class="empty">No employees found in this movement group.</div>`;
+    return `<div class="movement-list"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Profile</th></tr></thead><tbody>${rows.map(r=>{
+      const idx=cache.indexOf(r);
+      return `<tr class="clickable-row"><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${esc(r.Sex||'—')}</td><td>${r.DOJ instanceof Date?dateStr(r.DOJ):esc(r.DOJ||'—')}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  };
+  window.openMovementEmployee=function(type,index){
+    const row=(__movementCache[type]||[])[Number(index)];
+    if(!row){toast('Employee record could not be located. Please refresh the movement list.');return;}
+    const movement=document.getElementById('movementModal');
+    const profile=document.getElementById('profileModal');
+    if(movement)movement.classList.remove('open');
+    if(typeof showProfile==='function')showProfile(row);
+    else if(typeof openProfile==='function')openProfile(row);
+    if(profile){profile.style.zIndex='100001';profile.classList.add('open');}
+  };
+  window.closeMovementTracker=function(){
+    const modal=document.getElementById('movementModal');
+    if(modal){modal.classList.remove('open');modal.style.display='none';}
+  };
+  document.addEventListener('click',function(e){
+    const close=e.target.closest('#movementModal .close-x');
+    if(close){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.closeMovementTracker();return;}
+    const profile=e.target.closest('#movementModal .wis-movement-profile');
+    if(profile){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementEmployee(profile.dataset.movementType,profile.dataset.movementIndex);}
+  },true);
+  const css=document.createElement('style');
+  css.textContent='#movementModal .close-x{z-index:5;pointer-events:auto;cursor:pointer}#profileModal{z-index:100001!important}#profileModal.open{display:flex!important}';
+  document.head.appendChild(css);
+})();
+
+</script>
 <style>
 :root{--navy:#0B2545;--navy2:#13315C;--teal:#1D7A8C;--aqua:#3AAFA9;--gold:#C9A227;--coral:#E4572E;--plum:#6A4C93;--blue:#2E86AB;--green:#4C956C;--rose:#D1495B;--slate:#8D99AE;--ink:#12212F;--bg:#F4F6F9;--card:#FFF;--line:#E3E8EF;--muted:#64748B}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -401,6 +553,41 @@ tr.clickable-row:hover td{background:#E3F2F7 !important}
 .ls-footer b{color:#E4C55C}
 .ls-empty{padding:60px;text-align:center;color:#94A3B8;font-size:13px}
 </style>
+
+<style id="wis-upgrade-css">
+/* ===== WIS 2026 Upgrade Layer ===== */
+.di-filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 12px;background:#f7fafc;border:1px solid var(--line);border-radius:12px;margin-bottom:14px}
+.di-filter-label{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--navy);margin-right:2px}
+.di-pill{border:1px solid #cbd8e5;background:#fff;color:#33475b;border-radius:999px;padding:7px 12px;font:700 11px/1 inherit;cursor:pointer;transition:.16s}
+.di-pill:hover{border-color:var(--aqua);transform:translateY(-1px)}
+.di-pill.active{background:linear-gradient(135deg,var(--navy),var(--teal));border-color:var(--teal);color:#fff;box-shadow:0 4px 12px rgba(29,122,140,.22)}
+.di-pill.clear{margin-left:auto;background:#eef3f8;color:var(--navy)}
+.compare-focus-toolbar{color:#fff;padding:12px 16px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.focus-toolbar-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+#compareFocusContent .focus-compare-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px;min-width:0}
+#compareFocusContent .focus-pane{min-width:0;max-width:100%;max-height:calc(94vh - 130px);overflow:auto!important;overscroll-behavior:contain;padding:12px;background:#fbfcfe;border:2px solid #dce7f1;border-radius:12px}
+#compareFocusContent .focus-pane svg{width:100%!important;max-width:100%!important;height:auto!important;max-height:280px!important}
+#compareFocusContent .focus-pane .viz,#compareFocusContent .focus-pane .kpi,#compareFocusContent .focus-pane .grid{min-width:0;overflow-wrap:anywhere}
+.insight-engine{margin-top:14px}
+.insight-engine .insight-tag{display:inline-block;margin-left:auto;background:#eaf3f8;color:var(--teal);border-radius:999px;padding:2px 8px;font-size:9px;letter-spacing:.4px}
+.service-track-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}
+.service-track-summary .st-step{padding:9px;border:1px solid #e1eaf2;border-radius:10px;background:#fff;min-width:0}
+.service-track-summary .st-step b{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:3px}.service-track-summary .st-step span{font-size:11px;font-weight:800;color:var(--navy);overflow-wrap:anywhere}
+@media(max-width:900px){#compareFocusContent .focus-compare-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px}#compareFocusContent .focus-pane{padding:7px}.service-track-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.di-pill{padding:6px 10px;font-size:10px}}
+@media(max-width:560px){.di-filter-bar{gap:6px}.di-pill.clear{margin-left:0}.service-track-summary{grid-template-columns:1fr 1fr}}
+
+/* ===== Workforce Movement Tracker ===== */
+.movement-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 16px}
+.movement-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px;box-shadow:0 2px 10px rgba(11,37,69,.05)}
+.movement-card .mc-label{font-size:10px;text-transform:uppercase;letter-spacing:.7px;font-weight:800;color:var(--muted)}
+.movement-card .mc-value{font-size:25px;font-weight:900;color:var(--navy);margin:5px 0}
+.movement-card .mc-note{font-size:10.5px;color:var(--muted);line-height:1.35}
+.movement-card.exit{border-top:3px solid #D1495B}.movement-card.join{border-top:3px solid #2E7D32}.movement-card.net{border-top:3px solid var(--gold)}
+.movement-tabs{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0}.movement-tab{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:20px;padding:7px 12px;font:inherit;font-size:11px;font-weight:800;cursor:pointer}.movement-tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.movement-list{max-height:430px;overflow:auto;border:1px solid var(--line);border-radius:10px}.movement-list table{min-width:760px}.movement-search{width:min(360px,100%);padding:8px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;font-size:12px}
+@media(max-width:900px){.movement-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+</style>
 </head>
 <body>
 <div id="app">
@@ -472,6 +659,15 @@ tr.clickable-row:hover td{background:#E3F2F7 !important}
   <div class="analysis-box" id="compareAnalysisContent"></div>
 </div>
 
+<div id="movementModal" class="modal-overlay">
+  <div class="analysis-box" style="width:min(1200px,97vw)">
+    <div class="profile-header">
+      <button class="close-x" onclick="closeMovementTracker()">✕</button>
+      <div class="profile-hd-top"><div class="profile-avatar">⇄</div><div class="profile-hd-txt"><h2>Workforce Movement Tracker</h2><div class="psub">Track employees who exited between File A and File B, new joiners, and the net workforce movement.</div></div></div>
+    </div>
+    <div class="analysis-body" id="movementContent"></div>
+  </div>
+</div>
 <div id="csvModal" class="modal-overlay">
   <div class="modal-box" style="width:min(440px,92vw)">
     <h2>Export CSV</h2>
@@ -2133,7 +2329,7 @@ S_('Recruitment & Entry','Mode of Recruitment Mix',
   const series=modes.map((m,i)=>({name:m,color:PAL[i%PAL.length],
     values:years.map(y=>d.filter(r=>r._dojYear===y&&r['Mode of Recruit']===m).length)}));
   const donut=svgDonut(items,{centerLabel:'Employees',size:240});
-  const stacked=svgStacked(years.map(String),series,{w:Math.max(760,years.length*58+220),h:Math.max(300,years.length*30+50)});
+  const stacked=svgStacked(years.map(String),series,{w:Math.max(1100,years.length*92+300),h:520});
   return `<div class="grid g2" style="margin-bottom:14px">
     ${viz('Recruitment Channel Share',donut.svg,d,
         (c)=>d.filter(r=>String(r['Mode of Recruit'])===c),donut.legend)}
@@ -2482,8 +2678,8 @@ S_('Advanced Analytics','Attrition Risk Index',
         (c)=>{const b=bands.find(x=>x.label===c);return b?scored.filter(r=>b.test(r._risk)):scored;},
         donut.legend)}
     ${viz('Average Risk Score by Department',
-        svgBarsH(byDept,{w:620,labelW:170,colorFn:x=>x.value>45?PAL[4]:PAL[2],showPct:false}),
-        scored,(c)=>c&&c.startsWith('Other (')?scored.filter(r=>riskOtherDepts.has(String(r.Department))):scored.filter(r=>String(r.Department)===c),legendBars(byDept,{showPct:false}))}
+        svgBarsH(byDept,{w:620,labelW:170,colorFn:x=>x.value>65?'#D1495B':x.value>45?'#E08D3C':x.value>25?'#C9A227':'#4C956C',showPct:false}),
+        scored,(c)=>c&&c.startsWith('Other (')?scored.filter(r=>riskOtherDepts.has(String(r.Department))):scored.filter(r=>String(r.Department)===c),legendBars(byDept,{showPct:false,colorFn:x=>x.value>65?'#D1495B':x.value>45?'#E08D3C':x.value>25?'#C9A227':'#4C956C'}))}
   </div>
   ${insightBox([
     `<b>${fmtInt(items[3].value)}</b> employees sit in the <b>Critical</b> risk tier.`,
@@ -2510,7 +2706,7 @@ S_('Data Integrity','Completeness Audit',
     ${kpiCard('Excluded Fields',fmtInt(EXCLUDED.length),EXCLUDED.join(', '))}
   </div>
   ${viz('Field Completeness (% filled)',
-      svgBarsH(items,{w:720,labelW:170,suffix:'%',colorFn:x=>x.value<95?PAL[4]:PAL[7]}),
+      svgBarsH(items,{w:720,labelW:170,suffix:'%',colorFn:x=>x.value<70?'#D1495B':x.value<90?'#E08D3C':x.value<100?'#C9A227':'#4C956C'}),
       d,(c)=>{
         return d.filter(r=>{const v=r[c]; return v!==''&&v!=null;});
       },legendBars(items,{suffix:'%'}))}
@@ -2601,7 +2797,7 @@ function showProfile(row){
         <div class="profile-kpi"><div class="l">Age</div><div class="v">${row._age!=null?p1(row._age):'—'}</div><div class="s">years${row._x.DOB?' · born '+row._x.DOB.getFullYear():''}</div></div>
         <div class="profile-kpi"><div class="l">Tenure</div><div class="v">${row._tenure!=null?p1(row._tenure):'—'}</div><div class="s">years since DOJ</div></div>
         <div class="profile-kpi"><div class="l">In Department</div><div class="v">${row._deptTen!=null?p1(row._deptTen):'—'}</div><div class="s">years since dept DOJ</div></div>
-        <div class="profile-kpi"><div class="l">To Retirement</div><div class="v" style="color:${row._toRet!=null&&row._toRet<5?'var(--coral)':'var(--navy)'}">${row._toRet!=null?p1(row._toRet):'—'}</div><div class="s">years at age 60</div></div>
+        <div class="profile-kpi"><div class="l">To Retirement</div><div class="v" style="color:${row._toRet!=null&&row._toRet<5?'var(--coral)':'var(--navy)'}">${row._overRet?'<span style=\"color:#C0392B;font-weight:900\">CRITICAL RESOURCE</span>':(row._toRet!=null?p1(Math.max(0,row._toRet)):'—')}</div><div class="s">${row._overRet?'Retirement age: 60 (exceeded)':'Years remaining to age 60'}</div></div>
       </div>
       ${renderTimeline(row, rowBase)}
       <div class="profile-sect">
@@ -2697,6 +2893,69 @@ async function exportProfilePDF() {
 }
 
 /* ============================================================
+   WORKFORCE MOVEMENT / EMPLOYEE TRACKING
+   ============================================================ */
+function employeeIdentity(row){
+  const clean=v=>String(v==null?'':v).trim().toLowerCase().replace(/[^a-z0-9]+/g,'');
+  const code=clean(row && row.Code);
+  if(code) return 'code:'+code;
+  const name=clean(row && row.Name);
+  const dob=row && (row.DOB instanceof Date ? row.DOB.toISOString().slice(0,10) : clean(row.DOB));
+  const doj=row && (row.DOJ instanceof Date ? row.DOJ.toISOString().slice(0,10) : clean(row.DOJ));
+  return 'fallback:'+name+'|'+(dob||'')+'|'+(doj||'');
+}
+function getWorkforceMovements(){
+  if(!S.compareData) return {exits:[],joiners:[],matched:[],duplicateA:0,duplicateB:0};
+  const a=S.compareData.a.filtered||[], b=S.compareData.b.filtered||[];
+  const mapA=new Map(), mapB=new Map(); let duplicateA=0,duplicateB=0;
+  a.forEach(r=>{const k=employeeIdentity(r); if(mapA.has(k)) duplicateA++; else mapA.set(k,r);});
+  b.forEach(r=>{const k=employeeIdentity(r); if(mapB.has(k)) duplicateB++; else mapB.set(k,r);});
+  const exits=[],joiners=[],matched=[];
+  mapA.forEach((r,k)=>mapB.has(k)?matched.push({key:k,a:r,b:mapB.get(k)}):exits.push(r));
+  mapB.forEach((r,k)=>{if(!mapA.has(k))joiners.push(r);});
+  return {exits,joiners,matched,duplicateA,duplicateB};
+}
+function movementTable(rows,type){
+  const cols=['Code','Name','Designation','Department','Grade','Sex','DOJ'];
+  if(!rows.length) return `<div class="empty">No employees found in this movement group.</div>`;
+  return `<div class="movement-list"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Track</th></tr></thead><tbody>${rows.map((r,i)=>`<tr class="clickable-row"><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${esc(r.Sex||'—')}</td><td>${r.DOJ instanceof Date?dateStr(r.DOJ):esc(r.DOJ||'—')}</td><td><button class="btn ghost sm" onclick="openMovementEmployee('${type}',${i})">360° Profile</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+let __movementCache={exits:[],joiners:[],matched:[]};
+function openMovementEmployee(type,index){const row=(__movementCache[type]||[])[index];if(!row)return;closeMovementTracker();openProfile(row);}
+function filterMovementList(){
+  const q=(document.getElementById('movementSearch')?.value||'').trim().toLowerCase();
+  const type=window.__movementActiveTab||'exits';
+  const rows=(__movementCache[type]||[]).filter(r=>!q||Object.values(r).some(v=>String(v==null?'':v).toLowerCase().includes(q)));
+  const target=document.getElementById('movementTableArea'); if(target) target.innerHTML=movementTable(rows,type);
+}
+function setMovementTab(type){window.__movementActiveTab=type;document.querySelectorAll('.movement-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===type));const input=document.getElementById('movementSearch');if(input)input.value='';filterMovementList();}
+function openMovementTracker(){
+  if(!S.isCompare||!S.compareData){toast('Open comparison mode first.');return;}
+  const m=getWorkforceMovements(); __movementCache={exits:m.exits,joiners:m.joiners,matched:m.matched.map(x=>x.b)}; window.__movementActiveTab='exits';
+  const a=S.compareData.a.filtered.length,b=S.compareData.b.filtered.length,net=b-a;
+  const insights=[];
+  insights.push(`<li><b>Leavers / decreased population:</b> <b>${fmtInt(m.exits.length)}</b> employees appear in File A but are absent from File B.</li>`);
+  insights.push(`<li><b>New joiners / increased population:</b> <b>${fmtInt(m.joiners.length)}</b> employees appear in File B but were absent from File A.</li>`);
+  insights.push(`<li><b>Net workforce movement:</b> headcount changed by <b>${net>=0?'+':''}${fmtInt(net)}</b> employees; identity matching shows <b>${fmtInt(m.matched.length)}</b> continuing employees.</li>`);
+  if(m.exits.length){const g=groupCount(m.exits,'Department').sort((x,y)=>y.value-x.value)[0]; if(g)insights.push(`<li><b>Largest apparent exit concentration:</b> <b>${esc(g.label)}</b> with <b>${fmtInt(g.value)}</b> tracked employees.</li>`);}
+  if(m.joiners.length){const g=groupCount(m.joiners,'Department').sort((x,y)=>y.value-x.value)[0]; if(g)insights.push(`<li><b>Largest new-joiner concentration:</b> <b>${esc(g.label)}</b> with <b>${fmtInt(g.value)}</b> tracked employees.</li>`);}
+  const warn=(m.duplicateA||m.duplicateB)?`<div class="small-muted" style="margin-top:8px">Identity matching prefers Employee Code and falls back to Name + DOB + DOJ. Duplicate identities ignored during matching: A ${fmtInt(m.duplicateA)}, B ${fmtInt(m.duplicateB)}.</div>`:'';
+  document.getElementById('movementContent').innerHTML=`
+    <div class="movement-summary">
+      <div class="movement-card"><div class="mc-label">File A headcount</div><div class="mc-value">${fmtInt(a)}</div><div class="mc-note">Opening comparison population</div></div>
+      <div class="movement-card exit"><div class="mc-label">Exited / absent in B</div><div class="mc-value">${fmtInt(m.exits.length)}</div><div class="mc-note">In A, not matched in B</div></div>
+      <div class="movement-card join"><div class="mc-label">New joiners / new in B</div><div class="mc-value">${fmtInt(m.joiners.length)}</div><div class="mc-note">In B, not matched in A</div></div>
+      <div class="movement-card net"><div class="mc-label">Net headcount change</div><div class="mc-value">${net>=0?'+':''}${fmtInt(net)}</div><div class="mc-note">File B ${fmtInt(b)} vs File A ${fmtInt(a)}</div></div>
+    </div>
+    <div class="insights"><h4>◆ Workforce Movement Insights</h4><ul>${insights.join('')}</ul></div>${warn}
+    <div class="viz" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h4 style="margin:0">Employee-level Tracking</h4><input id="movementSearch" class="movement-search" oninput="filterMovementList()" placeholder="Search employee name, code, department…"></div>
+      <div class="movement-tabs"><button class="movement-tab active" data-tab="exits" onclick="setMovementTab('exits')">Exited / Not in B · ${fmtInt(m.exits.length)}</button><button class="movement-tab" data-tab="joiners" onclick="setMovementTab('joiners')">New in B · ${fmtInt(m.joiners.length)}</button><button class="movement-tab" data-tab="matched" onclick="setMovementTab('matched')">Continuing · ${fmtInt(m.matched.length)}</button></div><div id="movementTableArea"></div></div>`;
+  filterMovementList(); document.getElementById('movementModal').classList.add('open');
+}
+function closeMovementTracker(){document.getElementById('movementModal').classList.remove('open');}
+$('#movementModal').addEventListener('click',e=>{if(e.target.id==='movementModal')closeMovementTracker();});
+
+/* ============================================================
    COMPARATIVE ANALYSIS
    ============================================================ */
 function analysisThemeFor(title){const t=String(title||'').toLowerCase();if(/divers|inclusion|gender/.test(t))return 'diversity';if(/age|generation/.test(t))return 'age';if(/grade|designation|job code/.test(t))return 'grade';if(/retire|risk|succession/.test(t))return 'retirement';if(/tenure|experience|service/.test(t))return 'tenure';if(/recruit|joining|entry/.test(t))return 'recruitment';if(/branch|network/.test(t))return 'branch';return 'default';}
@@ -2781,7 +3040,7 @@ function refreshAnalysisModal() {
     const svgBarDataA = chartData.map(x => x.a);
     const svgBarDataB = chartData.map(x => x.b);
     const cats = chartData.map(x => x.label);
-    
+
     let chartHTML = '';
     if (chartType === 'groupedBars') {
         const grouped = svgGroupedBars(cats, [
@@ -2869,6 +3128,8 @@ function refreshAnalysisInsights() {
         const hcDelta = dB.length - dA.length;
         html += `<li><b>Headcount Dynamics:</b> The workforce has ${hcDelta>=0?'expanded':'contracted'} by <b>${Math.abs(hcDelta)} employees (${dA.length?p1(hcDelta/dA.length*100):0}%)</b>.</li>`;
     }
+    const movement=getWorkforceMovements();
+    if (showHc) html += `<li><b>Employee movement:</b> <b>${fmtInt(movement.joiners.length)}</b> employees are new in File B, while <b>${fmtInt(movement.exits.length)}</b> employees from File A are absent from File B. <button class="btn ghost sm" style="margin-left:6px" onclick="openMovementTracker()">Track employees</button></li>`;
     if (showAge) html += `<li><b>Average Age:</b> The mean age has ${ageDelta>0?'increased':'decreased'} by <b>${p1(Math.abs(ageDelta))} years</b>.</li>`;
     if (showSex) html += `<li><b>Diversity:</b> Female representation is at <b>${p1(femPctB)}%</b> (${femDelta>0?'+':''}${p1(femDelta)} pp shift).</li>`;
     if (showRet) html += `<li><b>Retirement Risk:</b> The cohort retiring within 5 years is now <b>${fmtInt(retB)}</b> (${dB.length?p1(retB/dB.length*100):0}%), a shift of ${retDelta>0?'+':''}${fmtInt(retDelta)} employees.</li>`;
@@ -2965,7 +3226,8 @@ function generateCompareAnalysis(slideTitle) {
             <label><input type="checkbox" id="ins_dim" checked onchange="refreshAnalysisInsights()"> <span id="lbl_dim">${__analysisState.dim}</span> Shift</label>
         </div>
         <div id="analysisInsights"></div>
-        <div style="text-align:center; margin-top:24px;">
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:24px;">
+            <button class="btn ghost" onclick="openMovementTracker()">⇄ Track Joiners & Exits</button>
             <button class="btn gold" onclick="exportAnalysisPNG()">🖼 Layout &amp; Save Analysis as A3 PNG</button>
         </div>
     </div>
@@ -3477,10 +3739,85 @@ function saveContentAsPDF(targetId,title){
   if(!w){toast('Allow pop-ups to create the PDF');return;}
   const styles=[...document.querySelectorAll('style')].map(x=>x.innerHTML).join('\n');
   w.document.open();
-  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+String(title||'Employee Report').replace(/[<>]/g,'')+'</title><style>'+styles+
-    '\n@page{size:auto;margin:12mm}body{background:#fff!important;margin:0!important;padding:12px!important;color:#172033!important}.modal-overlay{position:static!important;display:block!important;background:#fff!important;backdrop-filter:none!important}.profile-box,.compare-focus-box{position:static!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;box-shadow:none!important;border:0!important}.compare-focus-toolbar,.tile-badge,.tile-resize,.tile-delete,.tile-duplicate,.tile-crop,.no-print,button{display:none!important}#compareFocusContent{overflow:visible!important;max-height:none!important;height:auto!important;zoom:1!important;width:100%!important}svg{max-width:100%;break-inside:avoid}table{break-inside:auto}tr{break-inside:avoid;break-after:auto}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>'+target.outerHTML+'</body></html>');
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+String(title||'Employee Report').replace(/[<>]/g,'')+'</title><style>'+styles+'\n@page{size:auto;margin:12mm}body{background:#fff!important;margin:0!important;padding:12px!important;color:#172033!important}.modal-overlay{position:static!important;display:block!important;background:#fff!important;backdrop-filter:none!important}.profile-box,.compare-focus-box{position:static!important;width:100%!important;max-width:none!important;max-height:none!important;overflow:visible!important;box-shadow:none!important;border:0!important}.compare-focus-toolbar,.tile-badge,.tile-resize,.tile-delete,.tile-duplicate,.tile-crop,.no-print,button{display:none!important}#compareFocusContent{overflow:visible!important;max-height:none!important;height:auto!important;zoom:1!important;width:100%!important}svg{max-width:100%;break-inside:avoid}table{break-inside:auto}tr{break-inside:avoid;break-after:auto}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}</style></head><body>'+target.outerHTML+'</body></html>');
   w.document.close();w.focus();setTimeout(()=>w.print(),700);
 }
+
+/* ============================================================
+   WORKFORCE INTELLIGENCE STUDIO — UPGRADE LAYER
+   ============================================================ */
+window.__diGenderSelection = window.__diGenderSelection || new Set(['Male','Female','Transgender','Not Stated']);
+function wisNormaliseGender(v){
+  const s=String(v==null?'':v).trim().toLowerCase();
+  if(['male','m'].includes(s)) return 'Male';
+  if(['female','f'].includes(s)) return 'Female';
+  if(['transgender','trans','third gender','other'].includes(s)) return 'Transgender';
+  return 'Not Stated';
+}
+function wisDiversityRows(){return D().filter(r=>window.__diGenderSelection.has(wisNormaliseGender(r.Sex)));}
+function wisToggleGender(g){const set=window.__diGenderSelection;if(set.has(g))set.delete(g);else set.add(g);renderSlide(S.slideId);}
+function wisClearGender(){window.__diGenderSelection=new Set(['Male','Female','Transgender','Not Stated']);renderSlide(S.slideId);}
+function wisGenderPills(){const opts=['Male','Female','Transgender','Not Stated'];return `<div class="di-filter-bar"><span class="di-filter-label">D&I population</span>${opts.map(g=>`<button type="button" class="di-pill ${window.__diGenderSelection.has(g)?'active':''}" onclick="wisToggleGender('${g}')">${g}</button>`).join('')}<button type="button" class="di-pill clear" onclick="wisClearGender()">Reset view</button></div>`;}
+
+function wisCategoryInsights(rows, dimension, opts={}){
+  const label=opts.label||dimension; const key=dimension==='Age Band'?'_ageBand':dimension==='Retirement Horizon'?'_retBand':dimension;
+  const items=groupCount(rows,r=>r[key]); const top=items[0], tail=items[items.length-1]; const top3=items.slice(0,3); const top3n=top3.reduce((s,x)=>s+x.value,0);
+  const risk=rows.filter(r=>r._overRet||r._retiring5).length;
+  const female=rows.filter(r=>wisNormaliseGender(r.Sex)==='Female').length;
+  const femalePct=pct(female,rows.length);
+  const lines=[];
+  if(top) lines.push(`<b>Primary concentration:</b> ${esc(top.label)} leads ${esc(label.toLowerCase())} with <b>${fmtInt(top.value)}</b> employees (${p1(pct(top.value,rows.length))}%).`);
+  if(top3.length) lines.push(`<b>Top-3 skew:</b> ${top3.map(x=>esc(x.label)).join(', ')} collectively account for <b>${fmtInt(top3n)}</b> employees (${p1(pct(top3n,rows.length))}%).`);
+  if(tail) lines.push(`<b>Tail-end:</b> ${esc(tail.label)} is the smallest recorded category at exactly <b>${fmtInt(tail.value)}</b> employees.`);
+  if(opts.risk || dimension==='Retirement Horizon') lines.push(`<b>Critical risk:</b> <b>${fmtInt(risk)}</b> employees are already over retirement age or within the next five-year superannuation horizon.`);
+  if(opts.diversity || dimension==='Sex') lines.push(`<b>Gender representation:</b> female representation is <b>${p1(femalePct)}%</b> (${fmtInt(female)} employees), enabling an immediate inclusion-gap readout.`);
+  if(!lines.length) lines.push('No analytical signal is available for the current filtered population.');
+  return `<div class="insights insight-engine"><h4>◆ Executive Insight Engine <span class="insight-tag">${esc(label)}</span></h4><ul>${lines.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+}
+
+function wisRenderDI(){
+  const d=wisDiversityRows();
+  const byDept={};d.forEach(r=>{const dept=String(r.Department||'Unspecified');const g=wisNormaliseGender(r.Sex);if(!byDept[dept])byDept[dept]={Male:0,Female:0,Transgender:0,'Not Stated':0};byDept[dept][g]++;});
+  const deptItems=Object.entries(byDept).map(([label,v])=>({label,value:Object.values(v).reduce((a,b)=>a+b,0),femaleRate:(v.Male+v.Female)?v.Female/(v.Male+v.Female)*100:0})).sort((a,b)=>b.value-a.value);
+  const ages=['≤25','26-30','31-35','36-40','41-45','46-50','51-55','56-60','60+'];
+  const maleVals=ages.map(b=>d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)==='Male').length);
+  const femVals=ages.map(b=>d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)==='Female').length);
+  const genderItems=['Male','Female','Transgender','Not Stated'].map(g=>({label:g,value:d.filter(r=>wisNormaliseGender(r.Sex)===g).length})).filter(x=>x.value||window.__diGenderSelection.has(x.label));
+  const donut=svgDonut(genderItems,{centerLabel:'Employees'});
+  const deptStack=svgStacked(deptItems.slice(0,10).map(x=>x.label),['Male','Female','Transgender','Not Stated'].map((g,i)=>({name:g,color:PAL[i],values:deptItems.slice(0,10).map(x=>byDept[x.label][g]||0)})),{h:340});
+  const femaleRate=deptItems.map(x=>({label:x.label,value:Math.round(x.femaleRate*10)/10})).sort((a,b)=>b.value-a.value);
+  const ret5=d.filter(r=>r._retiring5).length, over=d.filter(r=>r._overRet).length;
+  return `${wisGenderPills()}<div class="grid g4" style="margin-bottom:14px">${kpiCard('Filtered Headcount',fmtInt(d.length),'D&I pill selection only')}${kpiCard('Female Share',p1(pct(d.filter(r=>wisNormaliseGender(r.Sex)==='Female').length,d.length))+'%',`${fmtInt(d.filter(r=>wisNormaliseGender(r.Sex)==='Female').length)} employees`)}${kpiCard('Gender Categories',fmtInt(genderItems.filter(x=>x.value>0).length),'Visible in current view')}${kpiCard('Retiring ≤ 5 Yrs',fmtInt(ret5),`${fmtInt(over)} already over age`)}</div><div class="grid g2" style="margin-bottom:14px">${viz('Gender Composition',donut.svg,d,cat=>d.filter(r=>wisNormaliseGender(r.Sex)===cat),donut.legend)}${viz('Gender Split by Age Band',svgPyramid(maleVals.map(value=>({value})),femVals.map(value=>({value})),{labels:ages,h:320}),d,cat=>{const [band,side]=cat.split('|');return d.filter(r=>r._ageBand===decodeURIComponent(band)&&wisNormaliseGender(r.Sex)===(side==='L'?'Male':'Female'));})}</div>${viz('Departmental Gender Stack — top 10 departments',deptStack.svg,d,()=>d,deptStack.legend)}${femaleRate.length?viz('Female Representation Rate by Department (%)',svgBarsH(femaleRate,{w:680,labelW:180,suffix:'%',colorFn:x=>x.value>=35?PAL[7]:(x.value>=20?PAL[3]:PAL[4])}),d,cat=>d.filter(r=>String(r.Department)===cat),legendBars(femaleRate,{suffix:'%'})):''}${wisCategoryInsights(d,'Sex',{label:'Diversity & Inclusion',diversity:true,risk:true})}`;
+}
+
+/* Replace D&I slide with interactive local filters. */
+const __wisDiSlide=SLIDES.find(s=>s.title==='Diversity & Inclusion Scorecard'); if(__wisDiSlide)__wisDiSlide.render=wisRenderDI;
+
+/* Enrich existing key analytical views without replacing their chart architecture. */
+['Organisational Concentration (Pareto)','Department Strength & Share','Grade Architecture','Age Distribution & Structure','Retirement Horizon'].forEach(title=>{const sl=SLIDES.find(s=>s.title===title);if(!sl)return;const old=sl.render;sl.render=function(){const html=old();const dim=title.includes('Grade')?'Grade':title.includes('Age')?'Age Band':title.includes('Retirement')?'Retirement Horizon':'Department';return html+wisCategoryInsights(D(),dim,{label:dim,risk:title.includes('Retirement')});};});
+
+/* Explicit four-point service track and service-risk calculation. */
+function wisServiceYears(emp){const base=emp._baseDate||S.baseDate||new Date();if(!emp._retireDate)return null;return yrs(base,emp._retireDate);}
+const __wisOldTimeline=renderTimeline;
+renderTimeline=function(emp,baseOverride){const base=baseOverride||emp._baseDate||S.baseDate||new Date();const points=[['Date of Birth',emp._x&&emp._x.DOB],['Institutional DOJ',emp._x&&emp._x.DOJ],['Departmental DOJ',emp._x&&emp._x['DOJ in Department']],['Projected Superannuation',emp._retireDate]].filter(x=>x[1]);if(points.length<2)return __wisOldTimeline(emp,baseOverride);const times=points.map(x=>x[1].getTime()),min=Math.min(...times),max=Math.max(...times),span=max-min||1;return `<div class="profile-sect"><div class="profile-sect-h">Visual Service Track</div><div class="profile-timeline"><div class="tl-track"><div class="tl-line"></div>${points.map(([label,date],i)=>`<div class="tl-pt" style="left:${Math.max(4,Math.min(96,(date.getTime()-min)/span*100))}%"><div class="tl-dot" style="border-color:${PAL[i]}"></div></div>`).join('')}</div><div class="service-track-summary">${points.map(([label,date])=>`<div class="st-step"><b>${esc(label)}</b><span>${dateStr(date)}</span></div>`).join('')}</div></div></div>`;};
+renderRiskBadges=function(emp){const rem=wisServiceYears(emp);let cls='ok',txt='✓ OK · Mid-career service horizon';if(rem!=null&&rem<0){cls='critical';txt='⚠ Critical · Past projected superannuation';}else if(rem!=null&&rem<=5){cls='warn';txt=`⚠ Warning · ${p1(Math.max(0,rem))} years remaining`; }else if(rem!=null&&rem<=10){cls='info';txt=`⏱ Monitor · ${p1(rem)} years to superannuation`; }return `<span class="profile-badge ${cls}">${txt}</span>${emp._tenure>=20?'<span class="profile-badge ok">★ Long-service employee</span>':''}`;};
+
+/* Focus mode now displays File A and File B as equal-width independently scrollable cards. */
+maximizeComparePane=function(which){
+  if(!S.isCompare||!S.compareData){toast('Comparison mode is not active');return;}
+  const modal=ensureCompareFocusModal(),content=document.getElementById('compareFocusContent');content.innerHTML='';
+  const a=document.querySelector('.compare-pane.pa'),b=document.querySelector('.compare-pane.pb');if(!a||!b){toast('Comparison panes are not available');return;}
+  const make=(node,focus)=>{const c=node.cloneNode(true);c.classList.add('focus-pane');if(focus)c.style.boxShadow='0 0 0 3px rgba(201,162,39,.35)';c.querySelectorAll('.compare-actions').forEach(x=>x.remove());return c;};
+  const grid=document.createElement('div');grid.className='focus-compare-grid';grid.append(make(a,which==='a'),make(b,which==='b'));content.appendChild(grid);
+  __compareFocusZoom=1;applyCompareFocusZoom();content.onclick=e=>{handleVizInteraction(e);};
+  document.getElementById('compareFocusTitle').textContent='File A vs File B — Focus Comparison';
+  document.getElementById('compareFocusExport').onclick=()=>openLayoutStudio({container:grid,title:'File A vs File B — Focus Comparison',subtitle:`Comparison · A: ${dateStrLong(S.compareData.a.baseDate)} · B: ${dateStrLong(S.compareData.b.baseDate)}`,filename:'File_A_vs_File_B_Focus'});
+  modal.classList.add('open');
+};
+
+/* Board export hardening: 2× A3 raster already used; normalize explicit orientation controls. */
+const __wisOldSetOrientation=typeof setStudioOrientation==='function'?setStudioOrientation:null;
+if(__wisOldSetOrientation){setStudioOrientation=function(o){__wisOldSetOrientation(o==='portrait'?'portrait':'landscape');};}
 
 async function saveStudioPDF(){
   const canvas=__layoutStudio.canvasEl;
@@ -3721,7 +4058,7 @@ function renderSlide(id){
         <div class="compare-head">
           <span><b>A</b> · ${esc(S.compareData.a.fileName||'Primary')}</span>
           <span class="bd">As of ${dateStrLong(S.compareData.a.baseDate)} · ${fmtInt(S.compareData.a.filtered.length)} rows</span>
-          <div class="compare-actions"><button class="btn ghost sm" onclick="maximizeComparePane('a')">⛶ Enlarge A</button><button class="btn gold sm" onclick="exportComparePaneA3('a')">A3 PNG</button></div>
+          <div class="compare-actions"><button class="btn ghost sm" onclick="maximizeComparePane('a')">⛶ Enlarge A</button><button class="btn ghost sm" onclick="maximizeCompareBoth()">⇄ Enlarge A + B</button><button class="btn gold sm" onclick="exportComparePaneA3('a')">A3 PNG</button></div>
         </div>
         <div class="compare-body pa-body"></div>
       </div>
@@ -3729,7 +4066,7 @@ function renderSlide(id){
         <div class="compare-head">
           <span><b>B</b> · ${esc(S.compareData.b.fileName||'Comparison')}</span>
           <span class="bd">As of ${dateStrLong(S.compareData.b.baseDate)} · ${fmtInt(S.compareData.b.filtered.length)} rows</span>
-          <div class="compare-actions"><button class="btn ghost sm" onclick="maximizeComparePane('b')">⛶ Enlarge B</button><button class="btn gold sm" onclick="exportComparePaneA3('b')">A3 PNG</button></div>
+          <div class="compare-actions"><button class="btn ghost sm" onclick="maximizeComparePane('b')">⛶ Enlarge B</button><button class="btn ghost sm" onclick="maximizeCompareBoth()">⇄ Enlarge A + B</button><button class="btn gold sm" onclick="exportComparePaneA3('b')">A3 PNG</button></div>
         </div>
         <div class="compare-body pb-body"></div>
       </div>
@@ -4012,6 +4349,614 @@ $('#colChips').innerHTML=RAWCOLS.map(c=>`<span>${esc(c)}</span>`).join('');
 window.addEventListener('beforeunload', e => {
   if (S.rows.length > 0) { e.preventDefault(); e.returnValue = ''; }
 });
+
+/* ===== Targeted refinement patch: 05 Nov 2026 ===== */
+/* 60+ staff are presented as policy exceptions, never as negative years-to-retirement. */
+function wisRetirementDisplay(row){
+  if(row && row._overRet) return '<span style="color:#C0392B;font-weight:900;display:inline-block;line-height:1.35">CRITICAL RESOURCE<br><small>Retirement age: 60 (exceeded)</small></span>';
+  return row && row._toRet!=null ? `${p1(Math.max(0,row._toRet))} years` : '—';
+}
+const __wisProfileHTML=typeof openProfile==='function'?openProfile:null;
+/* D&I: Male/Female only, with selectable department representation metric. */
+window.__diGenderSelection=new Set(['Male','Female']);
+window.__diRepresentationGender=window.__diRepresentationGender||'Female';
+function wisToggleGender(g){if(!['Male','Female'].includes(g))return;const set=window.__diGenderSelection;if(set.has(g))set.delete(g);else set.add(g);renderSlide(S.slideId);}
+function wisClearGender(){window.__diGenderSelection=new Set(['Male','Female']);renderSlide(S.slideId);}
+function wisGenderPills(){return `<div class="di-filter-bar"><span class="di-filter-label">D&I population</span>${['Male','Female'].map(g=>`<button type="button" class="di-pill ${window.__diGenderSelection.has(g)?'active':''}" onclick="wisToggleGender('${g}')">${g}</button>`).join('')}<button type="button" class="di-pill clear" onclick="wisClearGender()">Reset view</button></div>`;}
+function wisRenderDI(){
+ const all=D(), d=all.filter(r=>window.__diGenderSelection.has(wisNormaliseGender(r.Sex)));
+ const sex=window.__diRepresentationGender||'Female';
+ const ages=['≤25','26-30','31-35','36-40','41-45','46-50','51-55','56-60','60+'];
+ const male=ages.map(b=>d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)==='Male').length), female=ages.map(b=>d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)==='Female').length);
+ const genderItems=['Male','Female'].map(g=>({label:g,value:d.filter(r=>wisNormaliseGender(r.Sex)===g).length}));
+ const donut=svgDonut(genderItems,{centerLabel:'Employees'});
+ const deptNames=[...new Set(d.map(r=>String(r.Department||'Unspecified')))].sort();
+ const deptRows=deptNames.map(label=>{const sub=d.filter(r=>String(r.Department||'Unspecified')===label),m=sub.filter(r=>wisNormaliseGender(r.Sex)==='Male').length,f=sub.filter(r=>wisNormaliseGender(r.Sex)==='Female').length,den=m+f;return {label,m,f,value:den?Math.round((sex==='Female'?f:m)/den*1000)/10:0};}).sort((a,b)=>b.value-a.value);
+ const stack=svgStacked(deptRows.slice(0,10).map(x=>x.label),['Male','Female'].map((g,i)=>({name:g,color:i?PAL[3]:PAL[0],values:deptRows.slice(0,10).map(x=>x[g.toLowerCase()]||0)})),{h:340});
+ const selectedCount=d.length, f=d.filter(r=>wisNormaliseGender(r.Sex)==='Female').length,m=d.filter(r=>wisNormaliseGender(r.Sex)==='Male').length;
+ return `${wisGenderPills()}<div class="grid g4" style="margin-bottom:14px">${kpiCard('Filtered Headcount',fmtInt(selectedCount),'Male/Female population')}${kpiCard('Female Share',p1(pct(f,selectedCount))+'%',`${fmtInt(f)} employees`)}${kpiCard('Male Share',p1(pct(m,selectedCount))+'%',`${fmtInt(m)} employees`)}${kpiCard('Retiring ≤ 5 Yrs',fmtInt(d.filter(r=>r._retiring5).length),`${fmtInt(d.filter(r=>r._overRet).length)} critical resources already over 60`)}</div>
+ <div class="grid g2" style="margin-bottom:14px">${viz('D&I Population — Male & Female',donut.svg,d,c=>d.filter(r=>wisNormaliseGender(r.Sex)===c),donut.legend)}${viz('Gender Split by Age Band',svgPyramid(male.map(value=>({value})),female.map(value=>({value})),{labels:ages,h:340}),d,cat=>{const [band,side]=cat.split('|');return d.filter(r=>r._ageBand===decodeURIComponent(band)&&wisNormaliseGender(r.Sex)===(side==='L'?'Male':'Female'));})}</div>
+ ${viz('Departmental Gender Stack — top 10 departments',stack.svg,d,c=>d.filter(r=>String(r.Department||'Unspecified')===c),stack.legend)}
+ <div class="viz"><h4>Gender Representation Rate by Department (%)</h4><div class="di-filter-bar" style="margin:0 0 10px"><b>Show representation for:</b><button class="di-pill ${sex==='Male'?'active':''}" onclick="window.__diRepresentationGender='Male';renderSlide(S.slideId)">Male</button><button class="di-pill ${sex==='Female'?'active':''}" onclick="window.__diRepresentationGender='Female';renderSlide(S.slideId)">Female</button></div>${svgBarsH(deptRows,{w:760,labelW:190,suffix:'%',colorFn:x=>sex==='Female'?'#D1495B':'#2563EB'})}<div class="small-muted">Rate = selected gender headcount ÷ (Male + Female headcount) within each department. Hover over a bar for the percentage; click to list employees in that department.</div></div>
+ ${wisCategoryInsights(d,'Sex',{label:'Diversity & Inclusion',diversity:true,risk:true})}`;
+}
+const __wisDiSlide2=SLIDES.find(x=>x.title==='Diversity & Inclusion Scorecard');if(__wisDiSlide2)__wisDiSlide2.render=wisRenderDI;
+
+/* Pareto: replace ambiguous cumulative line with a clearly labelled cumulative-share ladder and hover explanations. */
+const __wisPareto=SLIDES.find(x=>x.title==='Organisational Concentration (Pareto)');
+if(__wisPareto)__wisPareto.render=function(){const d=D(),items=groupCount(d,r=>r.Department),total=items.reduce((a,x)=>a+x.value,0);let cum=0;const rows=items.slice(0,15).map((x,i)=>{cum+=x.value;return {...x,share:total?x.value/total*100:0,cum:total?cum/total*100:0,rank:i+1};});const body=rows.map(x=>`<tr title="${esc(x.label)}: ${fmtInt(x.value)} employees; ${p1(x.share)}% of workforce; cumulative ${p1(x.cum)}%"><td>${x.rank}</td><td>${esc(x.label)}</td><td style="text-align:right">${fmtInt(x.value)}</td><td style="text-align:right">${p1(x.share)}%</td><td style="min-width:180px"><div style="height:12px;background:#edf2f7;border-radius:8px;overflow:hidden"><span style="display:block;width:${x.cum}%;height:100%;background:#C9A227"></span></div><b>${p1(x.cum)}%</b></td></tr>`).join('');return `<div class="grid g2">${kpiCard('Departments',fmtInt(items.length),'Distinct units')}${kpiCard('Top-3 Share',p1(pct(rows.slice(0,3).reduce((a,x)=>a+x.value,0),total))+'%','Share held by the three largest departments')}</div><div class="viz"><h4>Department Headcount & Cumulative Workforce Share</h4><p class="small-muted" style="margin-bottom:10px">Read each row from left to right: headcount → department share → cumulative share. The gold bar grows as departments are added in descending headcount order. Hover any row for its exact values.</p><div class="tbl-wrap"><table class="dt"><thead><tr><th>Rank</th><th>Department</th><th>Employees</th><th>Department share</th><th>Cumulative share (gold)</th></tr></thead><tbody>${body}</tbody></table></div></div>${insightBox(autoInsights(items))}`;};
+
+/* Branch-size scatter: split by organisational unit class and ensure a unique click target for each bubble. */
+const __wisBranchAge=SLIDES.find(x=>x.title==='Branch Size vs Average Age');
+if(__wisBranchAge)__wisBranchAge.render=function(){const d=D();const units=[...new Set(d.map(r=>String(r['Branch Category']||'Unclassified').trim()))].sort();const sizes=[...new Set(d.map(r=>String(r['Branch Size']||'Unspecified').trim()))].sort();const combos=[];units.forEach(u=>sizes.forEach(sz=>{const sub=d.filter(r=>String(r['Branch Category']||'Unclassified').trim()===u&&String(r['Branch Size']||'Unspecified').trim()===sz&&r._age!=null);if(!sub.length)return;const branchMap=new Map();sub.forEach(r=>{const c=String(r['Branch Code']||'').trim()||String(r.Department||'');branchMap.set(c,(branchMap.get(c)||0)+1);});const counts=[...branchMap.values()],avgHC=counts.length?counts.reduce((a,b)=>a+b,0)/counts.length:0,avgAge=sub.reduce((a,r)=>a+r._age,0)/sub.length;combos.push({id:`${u} · ${sz}`,label:`${u} · ${sz}`,x:avgHC+(combos.length*0.015),y:avgAge+(combos.length*0.015),r:Math.max(8,Math.min(18,7+Math.sqrt(sub.length))),color:PAL[units.indexOf(u)%PAL.length],showLabel:true,_unit:u,_size:sz});}));const points=combos.map(x=>({...x}));return `${viz('Branch Category & Size Class vs Average Age',svgScatter(points,{xLabel:'Average employees per unit',yLabel:'Average age (years)',h:430}),d,cat=>{const p=combos.find(x=>x.label===cat);return p?d.filter(r=>String(r['Branch Category']||'Unclassified').trim()===p._unit&&String(r['Branch Size']||'Unspecified').trim()===p._size):[];})}<div class="small-muted">Each bubble represents one Branch Category × Branch Size combination (including HO Departments, DO and Branch where present). Bubble labels are unique; hover for the exact group and click to list only that group’s employees.</div>${insightBox(combos.sort((a,b)=>b.y-a.y).slice(0,3).map(x=>`<b>${esc(x.label)}</b>: average age ${p1(x.y)} years across ${fmtInt(d.filter(r=>String(r['Branch Category']||'Unclassified').trim()===x._unit&&String(r['Branch Size']||'Unspecified').trim()===x._size).length)} employees.`))}`;};
+
+/* Joining-year channel chart: large, horizontally scrollable plot with legible year labels. */
+const __wisRecruit=SLIDES.find(x=>x.title==='Mode of Recruitment Mix');
+if(__wisRecruit){const old=__wisRecruit.render;__wisRecruit.render=function(){let html=old();return html.replace(/svgStacked\(years\.map\(String\),series,\{w:Math\.max\(760,years\.length\*58\+220\),h:Math\.max\(300,years\.length\*30\+50\)\}\)/,'svgStacked(years.map(String),series,{w:Math.max(1100,years.length*92+300),h:520})').replace('Channel Usage Over Joining Years','Channel Usage Over Joining Years — enlarged view');};}
+
+/* Risk/completeness charts use a distinct stable color per category, matching the legend. */
+const __wisRisk=SLIDES.find(x=>x.title==='Attrition Risk Index');if(__wisRisk){const old=__wisRisk.render;__wisRisk.render=function(){return old().replace("colorFn:x=>x.value>65?'#D1495B':x.value>45?'#E08D3C':x.value>25?'#C9A227':'#4C956C'","colorFn:x=>x.value>65?'#D1495B':x.value>45?'#E08D3C':x.value>25?'#C9A227':'#4C956C'");};}
+const __wisComplete=SLIDES.find(x=>x.title==='Completeness Audit');if(__wisComplete){const old=__wisComplete.render;__wisComplete.render=function(){return old().replace("colorFn:x=>x.value<70?'#D1495B':x.value<90?'#E08D3C':x.value<100?'#C9A227':'#4C956C'","colorFn:x=>x.value<70?'#D1495B':x.value<90?'#E08D3C':x.value<100?'#C9A227':'#4C956C'");};}
+
+/* Repair movement tracker invocation when buttons are nested in comparison analysis overlays. */
+window.openMovementTracker=openMovementTracker;window.setMovementTab=setMovementTab;window.filterMovementList=filterMovementList;
+document.addEventListener('click',function(e){const b=e.target.closest('button');if(!b)return;const t=(b.textContent||'').trim().toLowerCase();if(t.includes('track joiners')||t==='track employees'){e.preventDefault();e.stopImmediatePropagation();openMovementTracker();}},true);
+
+/* Comparison focus: preserve both-pane focus and provide explicit individual A/B enlargement. */
+function maximizeComparePane(which){const pane=document.querySelector(which==='a'?'.compare-pane.pa':'.compare-pane.pb');if(!pane){toast('File '+which.toUpperCase()+' pane not found');return;}const modal=ensureCompareFocusModal(),content=document.getElementById('compareFocusContent');content.innerHTML='';const clone=pane.cloneNode(true);clone.classList.add('focus-pane');clone.style.width='100%';clone.style.maxWidth='none';clone.querySelectorAll('.compare-actions').forEach(x=>x.remove());clone.querySelectorAll('.tbl-wrap').forEach(x=>{x.style.maxHeight='none';x.style.overflow='auto';});content.appendChild(clone);__compareFocusZoom=1;applyCompareFocusZoom();content.onclick=e=>{e.stopPropagation();handleVizInteraction(e);};document.getElementById('compareFocusTitle').textContent=`File ${which.toUpperCase()} — Individual expanded view`;document.getElementById('compareFocusExport').onclick=()=>openLayoutStudio({container:clone,title:`File ${which.toUpperCase()} — Expanded`,subtitle:'Individual comparison dataset',filename:`File_${which.toUpperCase()}_Expanded`});modal.classList.add('open');}
+function maximizeCompareBoth(){const a=document.querySelector('.compare-pane.pa'),b=document.querySelector('.compare-pane.pb');if(!a||!b){toast('Both comparison panes are required');return;}const modal=ensureCompareFocusModal(),content=document.getElementById('compareFocusContent');content.innerHTML='';const grid=document.createElement('div');grid.className='focus-compare-grid';[a,b].forEach(n=>{const c=n.cloneNode(true);c.classList.add('focus-pane');c.querySelectorAll('.compare-actions').forEach(x=>x.remove());grid.appendChild(c);});content.appendChild(grid);__compareFocusZoom=1;applyCompareFocusZoom();document.getElementById('compareFocusTitle').textContent='File A vs File B — Side-by-side focus';document.getElementById('compareFocusExport').onclick=()=>openLayoutStudio({container:grid,title:'File A vs File B',filename:'File_A_vs_File_B'});modal.classList.add('open');}
+window.maximizeComparePane=maximizeComparePane;window.maximizeCompareBoth=maximizeCompareBoth;
+const __wisFocusToolbar=document.querySelector('#compareFocusModal .focus-toolbar-actions');if(__wisFocusToolbar&&!document.getElementById('compareFocusBothBtn')){const x=document.createElement('button');x.id='compareFocusBothBtn';x.className='btn ghost sm';x.type='button';x.textContent='⇄ Enlarge A + B';x.onclick=maximizeCompareBoth;__wisFocusToolbar.insertBefore(x,__wisFocusToolbar.firstChild);}
+
+
+/* FINAL FIX: independent A/B focus views and reliable movement-tracker navigation.
+   These assignments intentionally run after legacy focus-mode overrides. */
+window.maximizeComparePane = function(which){
+  which=String(which||'').toLowerCase();
+  if(which!=='a' && which!=='b'){toast('Choose File A or File B');return;}
+  const selector=which==='a'?'.compare-pane.pa':'.compare-pane.pb';
+  const source=document.querySelector(selector);
+  if(!source){toast('File '+which.toUpperCase()+' pane is not available');return;}
+  const modal=ensureCompareFocusModal();
+  const content=document.getElementById('compareFocusContent');
+  content.innerHTML='';
+  content.onclick=e=>{e.stopPropagation();if(typeof handleVizInteraction==='function')handleVizInteraction(e);};
+  const clone=source.cloneNode(true);
+  clone.classList.add('focus-pane');
+  clone.style.cssText+=';display:block;width:100%;max-width:none;min-width:0;overflow:visible;box-sizing:border-box';
+  clone.querySelectorAll('.compare-actions').forEach(el=>el.remove());
+  clone.querySelectorAll('.tbl-wrap').forEach(el=>{el.style.maxHeight='none';el.style.overflow='auto';});
+  clone.querySelectorAll('.viz svg').forEach(el=>{el.style.maxHeight='none';el.style.height='auto';});
+  content.appendChild(clone);
+  __compareFocusZoom=1;applyCompareFocusZoom();
+  document.getElementById('compareFocusTitle').textContent='File '+which.toUpperCase()+' — Individual expanded view';
+  document.getElementById('compareFocusExport').onclick=()=>openLayoutStudio({container:clone,title:'File '+which.toUpperCase()+' — Expanded',subtitle:'Individual comparison dataset',filename:'File_'+which.toUpperCase()+'_Expanded'});
+  modal.style.zIndex='220';modal.classList.add('open');
+};
+window.maximizeCompareBoth = function(){
+  const a=document.querySelector('.compare-pane.pa'),b=document.querySelector('.compare-pane.pb');
+  if(!a||!b){toast('Both comparison panes are required');return;}
+  const modal=ensureCompareFocusModal(),content=document.getElementById('compareFocusContent');
+  content.innerHTML='';content.onclick=e=>{e.stopPropagation();if(typeof handleVizInteraction==='function')handleVizInteraction(e);};
+  const grid=document.createElement('div');grid.className='focus-compare-grid';
+  grid.style.cssText='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;width:100%;';
+  [a,b].forEach((node)=>{const c=node.cloneNode(true);c.classList.add('focus-pane');c.style.cssText+=';min-width:0;width:100%;max-width:none;box-sizing:border-box';c.querySelectorAll('.compare-actions').forEach(el=>el.remove());grid.appendChild(c);});
+  content.appendChild(grid);__compareFocusZoom=1;applyCompareFocusZoom();
+  document.getElementById('compareFocusTitle').textContent='File A vs File B — Side-by-side focus';
+  document.getElementById('compareFocusExport').onclick=()=>openLayoutStudio({container:grid,title:'File A vs File B',subtitle:'Side-by-side comparison',filename:'File_A_vs_B_Expanded'});
+  modal.style.zIndex='220';modal.classList.add('open');
+};
+
+/* Use compareData as the source of truth; do not reject a valid comparison just
+   because another view has temporarily changed the isCompare flag. */
+window.openMovementTracker = function(){
+  if(!S.compareData || !S.compareData.a || !S.compareData.b){toast('Load File A and File B in Compare mode first.');return;}
+  const m=getWorkforceMovements();
+  __movementCache={exits:m.exits,joiners:m.joiners,matched:m.matched.map(x=>x.b)};
+  window.__movementActiveTab='exits';
+  const a=(S.compareData.a.filtered||[]).length,b=(S.compareData.b.filtered||[]).length,net=b-a;
+  const insights=[
+    `<li><b>Leavers / decreased population:</b> <b>${fmtInt(m.exits.length)}</b> employees are in File A but not matched in File B.</li>`,
+    `<li><b>New joiners / increased population:</b> <b>${fmtInt(m.joiners.length)}</b> employees are in File B but not matched in File A.</li>`,
+    `<li><b>Net workforce movement:</b> <b>${net>=0?'+':''}${fmtInt(net)}</b> employees; <b>${fmtInt(m.matched.length)}</b> continuing employees matched.</li>`
+  ];
+  if(m.exits.length){const g=groupCount(m.exits,'Department').sort((x,y)=>y.value-x.value)[0];if(g)insights.push(`<li><b>Largest apparent exit concentration:</b> <b>${esc(g.label)}</b> · ${fmtInt(g.value)} employees.</li>`);}
+  if(m.joiners.length){const g=groupCount(m.joiners,'Department').sort((x,y)=>y.value-x.value)[0];if(g)insights.push(`<li><b>Largest new-joiner concentration:</b> <b>${esc(g.label)}</b> · ${fmtInt(g.value)} employees.</li>`);}
+  const warn=(m.duplicateA||m.duplicateB)?`<div class="small-muted" style="margin-top:8px">Duplicate identities ignored during matching: File A ${fmtInt(m.duplicateA)}, File B ${fmtInt(m.duplicateB)}. Matching uses Employee Code, or Name + DOB + DOJ when code is unavailable.</div>`:'';
+  const root=document.getElementById('movementContent');
+  if(!root){toast('Movement tracker screen could not be found.');return;}
+  root.innerHTML=`<div class="movement-summary">
+    <div class="movement-card"><div class="mc-label">File A headcount</div><div class="mc-value">${fmtInt(a)}</div><div class="mc-note">Opening population</div></div>
+    <div class="movement-card exit"><div class="mc-label">Exited / absent in B</div><div class="mc-value">${fmtInt(m.exits.length)}</div><div class="mc-note">Present in A, not matched in B</div></div>
+    <div class="movement-card join"><div class="mc-label">New joiners / new in B</div><div class="mc-value">${fmtInt(m.joiners.length)}</div><div class="mc-note">Present in B, not matched in A</div></div>
+    <div class="movement-card net"><div class="mc-label">Net headcount change</div><div class="mc-value">${net>=0?'+':''}${fmtInt(net)}</div><div class="mc-note">File B ${fmtInt(b)} vs File A ${fmtInt(a)}</div></div></div>
+    <div class="insights"><h4>◆ Workforce Movement Insights</h4><ul>${insights.join('')}</ul></div>${warn}
+    <div class="viz" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h4 style="margin:0">Employee-level Tracking</h4><input id="movementSearch" class="movement-search" oninput="filterMovementList()" placeholder="Search employee name, code, department…"></div>
+    <div class="movement-tabs"><button class="movement-tab active" data-tab="exits" onclick="setMovementTab('exits')">Exited / Not in B · ${fmtInt(m.exits.length)}</button><button class="movement-tab" data-tab="joiners" onclick="setMovementTab('joiners')">New in B · ${fmtInt(m.joiners.length)}</button><button class="movement-tab" data-tab="matched" onclick="setMovementTab('matched')">Continuing · ${fmtInt(m.matched.length)}</button></div><div id="movementTableArea"></div></div>`;
+  filterMovementList();
+  const modal=document.getElementById('movementModal');
+  if(modal){modal.style.zIndex='500';modal.classList.add('open');modal.style.display='flex';}
+};
+window.setMovementTab=setMovementTab;window.filterMovementList=filterMovementList;
+
+/* Explicitly route both legacy and newer button labels to the tracker. */
+document.addEventListener('click',function(e){
+  const btn=e.target&&e.target.closest?e.target.closest('button'):null;if(!btn)return;
+  const label=(btn.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+  const inline=btn.getAttribute('onclick')||'';
+  if(label.includes('track joiners')||label.includes('track employee')||inline.includes('openMovementTracker')){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementTracker();
+  }
+},true);
+
+
+
+/* WIS final functional repairs — 05 Nov 2026 */
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+    #compareFocusModal .compare-focus-box{display:flex!important;flex-direction:column!important;height:94vh!important;max-height:94vh!important;min-height:0!important;}
+    #compareFocusModal #compareFocusContent{display:block!important;flex:1 1 auto!important;min-height:0!important;height:auto!important;max-height:none!important;overflow-x:auto!important;overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-x pan-y!important;}
+    #compareFocusModal #compareFocusContent .focus-pane{height:auto!important;max-height:none!important;overflow:visible!important;min-height:max-content!important;}
+    #movementModal{z-index:99999!important;position:fixed!important;inset:0!important;}
+    #movementModal.open{display:flex!important;visibility:visible!important;opacity:1!important;}
+    #movementModal .analysis-box{max-height:94vh!important;overflow:auto!important;}
+    .wis-drill-btn{display:inline-flex;align-items:center;gap:7px;border:0;background:#fff8df;color:#775900;text-decoration:none;font:inherit;font-weight:800;cursor:pointer;padding:7px 10px;border-radius:6px;min-width:110px;}
+    .wis-drill-btn .wis-goldbar{display:inline-block;height:10px;min-width:3px;max-width:110px;background:#C9A227;border-radius:5px;}
+    .wis-drill-btn:hover{background:#ffefb3;outline:1px solid #C9A227;}
+    .wis-inline-empty{padding:12px;color:#64748b;background:#f8fafc;border-radius:8px;}
+  `;
+  document.head.appendChild(style);
+
+  // Always route mouse-wheel movement to the enlarged page surface, including
+  // when the pointer is over an SVG, text label, or nested table.
+  document.addEventListener('wheel',function(e){
+    const modal=document.getElementById('compareFocusModal');
+    const content=document.getElementById('compareFocusContent');
+    if(!modal||!modal.classList.contains('open')||!content||!content.contains(e.target)||e.ctrlKey)return;
+    if(Math.abs(e.deltaY)>0){e.preventDefault();content.scrollTop+=e.deltaY;}
+    if(e.shiftKey&&Math.abs(e.deltaX)>0){content.scrollLeft+=e.deltaX;}
+  },{capture:true,passive:false});
+
+  // Department tenure/transfer consideration based on DOJ in Department.
+  const __baseRiskBadges=renderRiskBadges;
+  window.renderRiskBadges=function(emp){
+    let html=__baseRiskBadges(emp);
+    const years=Number(emp&&emp._deptTen);
+    if(!Number.isFinite(years)||years<0)return html;
+    const completed=Math.floor(years);
+    let tenure=years<1?'Recently joined department':`${completed} year${completed===1?'':'s'} in department`;
+    let decision=years<1?'Transfer review: Recently joined':years<2?'Transfer review: Review at 2 years':years<3?'Transfer review: 2-year review point reached':`${completed}-year department tenure: transfer review due`;
+    return html+`<span class="profile-badge info">🏢 ${tenure}</span><span class="profile-badge ${years>=2?'warn':'info'}">⇄ ${decision}</span>`;
+  };
+
+  // D&I: ensure both department charts use real viz containers, so segment
+  // clicks populate employee lists and pagerTable retains 360° profile actions.
+  window.__diGenderSelection=new Set(['Male','Female']);
+  window.__diRepresentationGender=window.__diRepresentationGender||'Female';
+  window.wisRenderDI=function(){
+    const all=D();
+    const d=all.filter(r=>window.__diGenderSelection.has(wisNormaliseGender(r.Sex)));
+    const sex=window.__diRepresentationGender==='Male'?'Male':'Female';
+    const ages=['≤25','26-30','31-35','36-40','41-45','46-50','51-55','56-60','60+'];
+    const male=ages.map(b=>d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)==='Male').length);
+    const female=ages.map(b=>d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)==='Female').length);
+    const genderItems=['Male','Female'].map(g=>({label:g,value:d.filter(r=>wisNormaliseGender(r.Sex)===g).length}));
+    const donut=svgDonut(genderItems,{centerLabel:'Employees'});
+    const names=[...new Set(d.map(r=>String(r.Department||'Unspecified').trim()||'Unspecified'))];
+    const rows=names.map(label=>{const sub=d.filter(r=>(String(r.Department||'Unspecified').trim()||'Unspecified')===label);const m=sub.filter(r=>wisNormaliseGender(r.Sex)==='Male').length;const f=sub.filter(r=>wisNormaliseGender(r.Sex)==='Female').length;const den=m+f;return {label,m,f,value:den?(sex==='Male'?m:f)/den*100:0};}).filter(x=>x.m+x.f>0).sort((a,b)=>b.value-a.value);
+    const top=rows.slice(0,10);
+    const stack=svgStacked(top.map(x=>x.label),[
+      {name:'Male',color:'#2563EB',values:top.map(x=>x.m)},
+      {name:'Female',color:'#D1495B',values:top.map(x=>x.f)}
+    ],{h:Math.max(340,top.length*36+45),w:900,labelW:210});
+    const stackViz=viz('Departmental Gender Stack — top 10 departments',stack.svg,d,cat=>{
+      const parts=String(cat||'').split('|');let dept=parts[0],gender=parts[1]||'';
+      try{dept=decodeURIComponent(dept);gender=decodeURIComponent(gender);}catch(_){ }
+      return d.filter(r=>(String(r.Department||'Unspecified').trim()||'Unspecified')===dept&&(!gender||wisNormaliseGender(r.Sex)===gender));
+    },stack.legend);
+    const rateSvg=svgBarsH(rows,{w:850,labelW:210,rowH:34,suffix:'%',colorFn:()=>sex==='Male'?'#2563EB':'#D1495B'});
+    const rateViz=viz('Gender Representation Rate by Department (%)',rateSvg,d,cat=>d.filter(r=>(String(r.Department||'Unspecified').trim()||'Unspecified')===String(cat)&&wisNormaliseGender(r.Sex)===sex),legendBars(rows,{suffix:'%',colorFn:()=>sex==='Male'?'#2563EB':'#D1495B'}));
+    const m=d.filter(r=>wisNormaliseGender(r.Sex)==='Male').length,f=d.filter(r=>wisNormaliseGender(r.Sex)==='Female').length;
+    return `${wisGenderPills()}<div class="grid g4" style="margin-bottom:14px">${kpiCard('Filtered Headcount',fmtInt(d.length),'Male/Female population')}${kpiCard('Female Share',p1(pct(f,d.length))+'%',`${fmtInt(f)} employees`)}${kpiCard('Male Share',p1(pct(m,d.length))+'%',`${fmtInt(m)} employees`)}${kpiCard('Retiring ≤ 5 Yrs',fmtInt(d.filter(r=>r._retiring5).length),`${fmtInt(d.filter(r=>r._overRet).length)} critical resources already over 60`)}</div>
+      <div class="grid g2" style="margin-bottom:14px">${viz('D&I Population — Male & Female',donut.svg,d,cat=>d.filter(r=>wisNormaliseGender(r.Sex)===cat),donut.legend)}${viz('Gender Split by Age Band',svgPyramid(male.map(value=>({value})),female.map(value=>({value})),{labels:ages,h:340}),d,cat=>{const [band,side]=String(cat).split('|');let b=band;try{b=decodeURIComponent(b);}catch(_){ }return d.filter(r=>r._ageBand===b&&wisNormaliseGender(r.Sex)===(side==='L'?'Male':'Female'));})}</div>
+      ${stackViz}<div class="viz"><div class="di-filter-bar" style="margin:0 0 10px"><b>Show representation for:</b><button type="button" class="di-pill ${sex==='Male'?'active':''}" onclick="window.__diRepresentationGender='Male';renderSlide(S.slideId)">Male</button><button type="button" class="di-pill ${sex==='Female'?'active':''}" onclick="window.__diRepresentationGender='Female';renderSlide(S.slideId)">Female</button></div>${rateViz}<div class="small-muted">Click a department bar or a gender segment to list matching employees. Select an employee's 360° Profile action in the list to open the dossier.</div></div>
+      ${wisCategoryInsights(d,'Sex',{label:'Diversity & Inclusion',diversity:true,risk:true})}`;
+  };
+  const di=SLIDES.find(x=>x.title==='Diversity & Inclusion Scorecard');if(di)di.render=window.wisRenderDI;
+
+  // Pareto cumulative gold bar: clickable button opens exact department records.
+  window.wisShowParetoDepartment=function(encoded,button){
+    let dept='';try{dept=decodeURIComponent(encoded);}catch(_){dept=encoded;}
+    const rows=D().filter(r=>String(r.Department||'')===dept);
+    const vizEl=button&&button.closest('.viz');
+    const host=vizEl?vizEl.querySelector('.viz-detail'):document.getElementById('wisParetoDetail');
+    if(!host)return;
+    host.innerHTML=`<div class="dt-h">◆ <b>${esc(dept)}</b><span class="chip">${fmtInt(rows.length)} employees</span></div>${rows.length?pagerTable(rows,DETAIL_COLS,40):'<div class="wis-inline-empty">No employees found for this department.</div>'}`;
+    host.scrollIntoView({behavior:'smooth',block:'nearest'});
+  };
+  const pareto=SLIDES.find(x=>x.title==='Organisational Concentration (Pareto)');
+  if(pareto)pareto.render=function(){
+    const d=D(),items=groupCount(d,r=>r.Department).filter(x=>x.label).sort((a,b)=>b.value-a.value),total=items.reduce((a,x)=>a+x.value,0);let cumulative=0;
+    const rows=items.slice(0,15).map((x,i)=>{cumulative+=x.value;return {...x,share:total?x.value/total*100:0,cum:total?cumulative/total*100:0,rank:i+1};});
+    const body=rows.map(x=>{const key=encodeURIComponent(x.label);return `<tr><td>${x.rank}</td><td>${esc(x.label)}</td><td style="text-align:right">${fmtInt(x.value)}</td><td style="text-align:right">${p1(x.share)}%</td><td><button type="button" class="wis-drill-btn" title="Click to list ${esc(x.label)} employees" onclick="wisShowParetoDepartment('${key}',this)"><span class="wis-goldbar" style="width:${Math.max(3,x.cum*1.1)}px"></span><b>${p1(x.cum)}%</b></button></td></tr>`;}).join('');
+    return `<div class="grid g2">${kpiCard('Departments',fmtInt(items.length),'Distinct units')}${kpiCard('Top-3 Share',p1(pct(rows.slice(0,3).reduce((a,x)=>a+x.value,0),total))+'%','Share held by the three largest departments')}</div><div class="viz"><h4>Department Headcount & Cumulative Workforce Share</h4><p class="small-muted">Click any gold cumulative-share bar to display that department's employees. Employee rows include the 360° profile action.</p><div class="tbl-wrap"><table class="dt"><thead><tr><th>Rank</th><th>Department</th><th>Employees</th><th>Department share</th><th>Cumulative share (clickable)</th></tr></thead><tbody>${body}</tbody></table></div><div class="viz-detail"></div></div>${insightBox(autoInsights(items))}`;
+  };
+
+  // Movement tracker: use the actual comparison datasets, not S.isCompare; show
+  // a visible diagnostic instead of silently failing if an unexpected shape occurs.
+  window.openMovementTracker=function(){
+    try{
+      const cd=S&&S.compareData;
+      if(!cd||!cd.a||!cd.b){toast('Load both File A and File B in Compare mode first.');return;}
+      const aRows=cd.a.filtered||cd.a.rows||[],bRows=cd.b.filtered||cd.b.rows||[];
+      const identity=row=>{const clean=v=>String(v==null?'':v).trim().toLowerCase().replace(/[^a-z0-9]+/g,'');const code=clean(row.Code);if(code)return 'code:'+code;const name=clean(row.Name);const dob=row.DOB instanceof Date?row.DOB.toISOString().slice(0,10):clean(row.DOB);const doj=row.DOJ instanceof Date?row.DOJ.toISOString().slice(0,10):clean(row.DOJ);return name?'fallback:'+name+'|'+dob+'|'+doj:'unidentified:'+Math.random();};
+      const mapA=new Map(),mapB=new Map();let duplicateA=0,duplicateB=0;
+      aRows.forEach(r=>{const k=identity(r);if(mapA.has(k))duplicateA++;else mapA.set(k,r);});
+      bRows.forEach(r=>{const k=identity(r);if(mapB.has(k))duplicateB++;else mapB.set(k,r);});
+      const exits=[],joiners=[],matched=[];
+      mapA.forEach((r,k)=>mapB.has(k)?matched.push({key:k,a:r,b:mapB.get(k)}):exits.push(r));
+      mapB.forEach((r,k)=>{if(!mapA.has(k))joiners.push(r);});
+      __movementCache={exits,joiners,matched:matched.map(x=>x.b)};window.__movementActiveTab='exits';
+      const net=bRows.length-aRows.length;
+      const root=document.getElementById('movementContent');if(!root){toast('Movement tracker panel is missing from this page.');return;}
+      const insights=[`<li><b>Employees in A but not matched in B:</b> ${fmtInt(exits.length)}</li>`,`<li><b>Employees in B but not matched in A:</b> ${fmtInt(joiners.length)}</li>`,`<li><b>Continuing employees:</b> ${fmtInt(matched.length)}</li>`];
+      const largest=(arr,label)=>{if(!arr.length)return;const g=groupCount(arr,r=>r.Department).sort((x,y)=>y.value-x.value)[0];if(g)insights.push(`<li><b>${label}:</b> ${esc(g.label)} · ${fmtInt(g.value)} employees</li>`);};
+      largest(exits,'Largest apparent exit concentration');largest(joiners,'Largest new-joiner concentration');
+      root.innerHTML=`<div class="movement-summary"><div class="movement-card"><div class="mc-label">File A headcount</div><div class="mc-value">${fmtInt(aRows.length)}</div><div class="mc-note">Opening population</div></div><div class="movement-card exit"><div class="mc-label">Exited / absent in B</div><div class="mc-value">${fmtInt(exits.length)}</div><div class="mc-note">In A, not matched in B</div></div><div class="movement-card join"><div class="mc-label">New joiners</div><div class="mc-value">${fmtInt(joiners.length)}</div><div class="mc-note">In B, not matched in A</div></div><div class="movement-card net"><div class="mc-label">Net headcount change</div><div class="mc-value">${net>=0?'+':''}${fmtInt(net)}</div><div class="mc-note">File B compared with A</div></div></div><div class="insights"><h4>◆ Workforce Movement Insights</h4><ul>${insights.join('')}</ul></div>${duplicateA||duplicateB?`<p class="small-muted">Duplicate identities ignored: File A ${duplicateA}; File B ${duplicateB}. Matching uses Employee Code, or Name + DOB + DOJ when code is unavailable.</p>`:''}<div class="viz" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h4 style="margin:0">Employee-level Tracking</h4><input id="movementSearch" class="movement-search" oninput="filterMovementList()" placeholder="Search employee name, code, department…"></div><div class="movement-tabs"><button class="movement-tab active" data-tab="exits" onclick="setMovementTab('exits')">Exited / Not in B · ${fmtInt(exits.length)}</button><button class="movement-tab" data-tab="joiners" onclick="setMovementTab('joiners')">New in B · ${fmtInt(joiners.length)}</button><button class="movement-tab" data-tab="matched" onclick="setMovementTab('matched')">Continuing · ${fmtInt(matched.length)}</button></div><div id="movementTableArea"></div></div>`;
+      if(typeof filterMovementList==='function')filterMovementList();
+      const modal=document.getElementById('movementModal');if(!modal){toast('Movement tracker window is missing.');return;}modal.classList.add('open');modal.style.display='flex';modal.style.visibility='visible';modal.style.opacity='1';modal.style.zIndex='99999';
+    }catch(err){console.error('Movement tracker error',err);toast('Movement tracker could not open: '+(err&&err.message?err.message:'unexpected error'));}
+  };
+  window.setMovementTab=function(type){window.__movementActiveTab=type;document.querySelectorAll('.movement-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===type));const i=document.getElementById('movementSearch');if(i)i.value='';filterMovementList();};
+  window.filterMovementList=function(){const q=(document.getElementById('movementSearch')?.value||'').trim().toLowerCase();const type=window.__movementActiveTab||'exits';const rows=(__movementCache[type]||[]).filter(r=>!q||Object.values(r).some(v=>String(v==null?'':v).toLowerCase().includes(q)));const target=document.getElementById('movementTableArea');if(target)target.innerHTML=movementTable(rows,type);};
+
+  // Capture clicks once, and route both button labels to the same reliable entry point.
+  document.addEventListener('click',function(e){const b=e.target&&e.target.closest?e.target.closest('button'):null;if(!b)return;const label=(b.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();if(label.includes('track joiners')||label.includes('track employee')){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementTracker();}},true);
+})();
+
+
+/* Movement tracker interaction repair: close cleanly and open the selected 360° dossier above it. */
+(function(){
+  const priorTable = window.movementTable || movementTable;
+  window.movementTable = function(rows,type){
+    const cache=__movementCache[type]||[];
+    const cols=['Code','Name','Designation','Department','Grade','Sex','DOJ'];
+    if(!rows.length)return `<div class="empty">No employees found in this movement group.</div>`;
+    return `<div class="movement-list"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Profile</th></tr></thead><tbody>${rows.map(r=>{
+      const idx=cache.indexOf(r);
+      return `<tr class="clickable-row"><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${esc(r.Sex||'—')}</td><td>${r.DOJ instanceof Date?dateStr(r.DOJ):esc(r.DOJ||'—')}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;
+    }).join('')}</tbody></table></div>`;
+  };
+  window.openMovementEmployee=function(type,index){
+    const row=(__movementCache[type]||[])[Number(index)];
+    if(!row){toast('Employee record could not be located. Please refresh the movement list.');return;}
+    const movement=document.getElementById('movementModal');
+    const profile=document.getElementById('profileModal');
+    if(movement)movement.classList.remove('open');
+    if(typeof showProfile==='function')showProfile(row);
+    else if(typeof openProfile==='function')openProfile(row);
+    if(profile){profile.style.zIndex='100001';profile.classList.add('open');}
+  };
+  window.closeMovementTracker=function(){
+    const modal=document.getElementById('movementModal');
+    if(modal){modal.classList.remove('open');modal.style.display='none';}
+  };
+  document.addEventListener('click',function(e){
+    const close=e.target.closest('#movementModal .close-x');
+    if(close){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.closeMovementTracker();return;}
+    const profile=e.target.closest('#movementModal .wis-movement-profile');
+    if(profile){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementEmployee(profile.dataset.movementType,profile.dataset.movementIndex);}
+  },true);
+  const css=document.createElement('style');
+  css.textContent='#movementModal .close-x{z-index:5;pointer-events:auto;cursor:pointer}#profileModal{z-index:100001!important}#profileModal.open{display:flex!important}';
+  document.head.appendChild(css);
+})();
+
+
+
+/* WIS 2026 deep comparison, full-chart focus, complete PDF and movement watermarks */
+(function(){
+  const style=document.createElement('style');
+  style.textContent=`
+  #wisRecruitChartModal{position:fixed;inset:0;z-index:100500;background:rgba(7,18,34,.94);display:none;align-items:stretch;justify-content:center;padding:14px;}
+  #wisRecruitChartModal.open{display:flex}
+  #wisRecruitChartModal .wis-chart-shell{background:#fff;border-radius:14px;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 70px #0008}
+  #wisRecruitChartModal .wis-chart-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-bottom:1px solid #e4eaf1;flex-wrap:wrap}
+  #wisRecruitChartModal .wis-chart-body{flex:1;min-height:0;overflow:auto;padding:20px;background:#fff}
+  #wisRecruitChartModal svg{display:block;width:100%!important;height:auto!important;max-width:none!important;max-height:none!important}
+  #wisRecruitChartModal .legend{display:flex;flex-wrap:wrap;gap:10px 18px;padding:16px 8px;font-size:13px}
+  .wis-recruit-enlarge{margin:0 0 12px auto;display:block}
+  .movement-list{position:relative;isolation:isolate;overflow:auto}
+  .movement-list.wis-exits:before,.movement-list.wis-joiners:before,.movement-list.wis-review:before{position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);font-size:clamp(34px,6vw,68px);font-weight:900;letter-spacing:5px;white-space:nowrap;pointer-events:none;opacity:.30;text-transform:uppercase;}
+  .movement-list.wis-exits:before{content:'NOT IN SERVICE';color:#c62828}
+  .movement-list.wis-joiners:before{content:'NEW JOINEE';color:#16834a}
+  .movement-list.wis-review:before{content:'IDENTITY REVIEW';color:#b7791f}
+  .movement-list table{position:relative;z-index:1;background:transparent}
+  .movement-list th,.movement-list td{background:rgba(255,255,255,.80)}
+  `;
+  document.head.appendChild(style);
+
+  function ensureChartModal(){
+    let m=document.getElementById('wisRecruitChartModal');
+    if(!m){m=document.createElement('div');m.id='wisRecruitChartModal';m.innerHTML=`<div class="wis-chart-shell"><div class="wis-chart-head"><div><b>Channel Usage Over Joining Years</b><div class="small-muted">Full-screen chart · scroll vertically or horizontally if required</div></div><button type="button" class="btn ghost" onclick="closeWisRecruitChart()">Close ✕</button></div><div class="wis-chart-body" id="wisRecruitChartBody"></div></div>`;document.body.appendChild(m);m.addEventListener('click',e=>{if(e.target===m)closeWisRecruitChart();});}
+    return m;
+  }
+  window.openWisRecruitChart=function(btn){
+    const vizEl=btn&&btn.closest('.viz');if(!vizEl)return;
+    const body=document.getElementById('wisRecruitChartBody');if(!body)return;
+    body.innerHTML='';
+    const chart=vizEl.querySelector('svg');if(chart){const clone=chart.cloneNode(true);clone.style.width='100%';clone.style.height='auto';clone.style.maxHeight='none';body.appendChild(clone);}
+    const legend=vizEl.querySelector('.legend');if(legend)body.appendChild(legend.cloneNode(true));
+    const m=ensureChartModal();m.classList.add('open');document.body.style.overflow='hidden';
+  };
+  window.closeWisRecruitChart=function(){const m=document.getElementById('wisRecruitChartModal');if(m)m.classList.remove('open');document.body.style.overflow='';};
+  const oldRenderSlide=window.renderSlide||renderSlide;
+  window.renderSlide=function(id){oldRenderSlide(id);document.querySelectorAll('#baseContent .viz').forEach(v=>{const h=v.querySelector('h4');if(h&&/Channel Usage Over Joining Years/i.test(h.textContent)&&!v.querySelector('.wis-recruit-enlarge')){const b=document.createElement('button');b.type='button';b.className='btn ghost sm wis-recruit-enlarge';b.textContent='⛶ View full screen';b.onclick=()=>window.openWisRecruitChart(b);h.insertAdjacentElement('afterend',b);}});};
+
+  // Robust date and identity normalisation. Generated placeholder codes (R1, R2...) are not treated as real IDs.
+  const norm=v=>String(v==null?'':v).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  function dateValue(row,key){
+    const x=row&&row._x&&row._x[key];if(x instanceof Date&&!isNaN(x))return x;
+    const v=row&&row[key];if(v instanceof Date&&!isNaN(v))return v;
+    if(v==null||v==='')return null;
+    if(typeof v==='number'&&v>20000&&v<80000)return new Date(Date.UTC(1899,11,30)+v*86400000);
+    const s=String(v).trim();let m;
+    if((m=s.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{4})$/))){const d=+m[1],mo=+m[2]-1,y=+m[3];const dt=new Date(y,mo,d);return dt.getFullYear()===y&&dt.getMonth()===mo&&dt.getDate()===d?dt:null;}
+    const dt=new Date(s);return isNaN(dt)?null:dt;
+  }
+  function dateKey(row,key){const d=dateValue(row,key);return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';}
+  function realCode(row){const c=norm(row&&row.Code);return !c||/^r\d+$/.test(c)?'':c;}
+  function nameKey(row){return norm(row&&row.Name);}
+  function buildMovementAnalysis(){
+    const A=S.compareData.a,B=S.compareData.b;
+    const a=A.rows||[],b=B.rows||[]; // Deliberately use the complete snapshots, not dashboard-filtered subsets.
+    const usedA=new Set(),usedB=new Set(),matches=[],ambiguousA=new Set(),ambiguousB=new Set();
+    const by=(rows,fn)=>{const m=new Map();rows.forEach((r,i)=>{const k=fn(r);if(!k)return;if(!m.has(k))m.set(k,[]);m.get(k).push(i);});return m;};
+    const ac=by(a,realCode),bc=by(b,realCode);
+    for(const [k,ai] of ac){const bi=bc.get(k)||[];if(ai.length===1&&bi.length===1){usedA.add(ai[0]);usedB.add(bi[0]);matches.push({a:a[ai[0]],b:b[bi[0]],method:'Employee Code'});}else if(ai.length>1||bi.length>1){ai.forEach(i=>ambiguousA.add(i));bi.forEach(i=>ambiguousB.add(i));}}
+    // Resolve code changes/blank codes with stable personal identity (Name + DOB), independent of DOJ.
+    const ab=by(a,(r)=>{const n=nameKey(r),d=dateKey(r,'DOB');return n&&d?'nd:'+n+'|'+d:'';});
+    const bb=by(b,(r)=>{const n=nameKey(r),d=dateKey(r,'DOB');return n&&d?'nd:'+n+'|'+d:'';});
+    for(const [k,ai] of ab){const bi=bb.get(k)||[];const ua=ai.filter(i=>!usedA.has(i)),ub=bi.filter(i=>!usedB.has(i));if(ua.length===1&&ub.length===1){usedA.add(ua[0]);usedB.add(ub[0]);matches.push({a:a[ua[0]],b:b[ub[0]],method:'Name + Date of Birth'});}else if(ua.length&&ub.length&&(ua.length>1||ub.length>1)){ua.forEach(i=>ambiguousA.add(i));ub.forEach(i=>ambiguousB.add(i));}}
+    // If DOB is unavailable, only use Name + DOJ when unique on both sides.
+    const aj=by(a,r=>{const n=nameKey(r),d=dateKey(r,'DOJ');return n&&d&&!dateKey(r,'DOB')?'nj:'+n+'|'+d:'';});
+    const bj=by(b,r=>{const n=nameKey(r),d=dateKey(r,'DOJ');return n&&d&&!dateKey(r,'DOB')?'nj:'+n+'|'+d:'';});
+    for(const [k,ai] of aj){const bi=bj.get(k)||[];const ua=ai.filter(i=>!usedA.has(i)),ub=bi.filter(i=>!usedB.has(i));if(ua.length===1&&ub.length===1){usedA.add(ua[0]);usedB.add(ub[0]);matches.push({a:a[ua[0]],b:b[ub[0]],method:'Name + DOJ (DOB unavailable)'});}}
+    const exits=a.filter((r,i)=>!usedA.has(i)).map(r=>({...r,__movementReason:'Present in File A; no confident identity match in File B'}));
+    const unmatchedB=b.map((r,i)=>({r,i})).filter(x=>!usedB.has(x.i));
+    const aDate=A.baseDate instanceof Date?A.baseDate:new Date(A.baseDate),bDate=B.baseDate instanceof Date?B.baseDate:new Date(B.baseDate);
+    const joiners=[],historical=[];
+    unmatchedB.forEach(({r})=>{const doj=dateValue(r,'DOJ');if(doj&&!isNaN(aDate)&&doj>aDate&&(!isNaN(bDate)?doj<=bDate:true)){joiners.push({...r,__movementReason:'DOJ falls after File A snapshot and on/before File B snapshot'});}else{historical.push({...r,__movementReason:!doj?'DOJ missing / unparseable':doj<=aDate?'DOJ is on/before File A snapshot; not a genuine new joinee':'DOJ is after File B snapshot; verify source date'});}});
+    return {a,b,matches,exits,joiners,historical,ambiguousA:ambiguousA.size,ambiguousB:ambiguousB.size,baseA:aDate,baseB:bDate};
+  }
+  function movementListMarkup(rows,type){
+    const cls=type==='exits'?'wis-exits':type==='joiners'?'wis-joiners':type==='historical'?'wis-review':'';
+    if(!rows.length)return `<div class="empty">No employees in this category after full-snapshot verification.</div>`;
+    const cols=['Code','Name','Designation','Department','Grade','DOJ'];
+    return `<div class="movement-list ${cls}"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Match / validation</th><th>Profile</th></tr></thead><tbody>${rows.map(r=>{const idx=(__movementCache[type]||[]).indexOf(r);const d=dateValue(r,'DOJ');return `<tr><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${d?dateStr(d):'—'}</td><td>${esc(r.__movementReason||'')}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;}).join('')}</tbody></table></div>`;
+  }
+  window.movementTable=function(rows,type){return movementListMarkup(rows,type);};
+  window.openMovementTracker=function(){
+    try{
+      if(!S.compareData||!S.compareData.a||!S.compareData.b){toast('Load both File A and File B in Compare mode first.');return;}
+      const m=buildMovementAnalysis();
+      __movementCache={exits:m.exits,joiners:m.joiners,historical:m.historical,matched:m.matches.map(x=>x.b)};
+      window.__movementActiveTab='exits';
+      const root=document.getElementById('movementContent');if(!root)return;
+      const methodCounts={code:m.matches.filter(x=>x.method==='Employee Code').length,dob:m.matches.filter(x=>x.method==='Name + Date of Birth').length,doj:m.matches.filter(x=>x.method.startsWith('Name + DOJ')).length};
+      const net=m.b.length-m.a.length;
+      const analysis=`<div class="insights" style="margin-top:12px"><h4>◆ Full-snapshot identity &amp; date validation</h4><ul>
+        <li>Compared <b>${fmtInt(m.a.length)}</b> complete File A records against <b>${fmtInt(m.b.length)}</b> complete File B records. Dashboard filters are intentionally ignored for this audit.</li>
+        <li><b>${fmtInt(m.matches.length)}</b> continuing employees matched: ${fmtInt(methodCounts.code)} by Employee Code, ${fmtInt(methodCounts.dob)} by Name + DOB, and ${fmtInt(methodCounts.doj)} by Name + DOJ where DOB is unavailable.</li>
+        <li><b>${fmtInt(m.joiners.length)}</b> validated new joinees have DOJ after File A snapshot (${dateStrLong(m.baseA)}) and on/before File B snapshot (${dateStrLong(m.baseB)}).</li>
+        <li><b>${fmtInt(m.historical.length)}</b> unmatched File B records have an old, missing, or inconsistent DOJ. They are excluded from New Joinee and listed separately for identity/source review.</li>
+        <li><b>${fmtInt(m.exits.length)}</b> File A records have no confident match in File B. This means absent/unmatched in B, not proof of a confirmed service exit.</li>
+        <li>Headcount change: <b>${net>=0?'+':''}${fmtInt(net)}</b>. Ambiguous duplicate identity groups flagged: File A ${fmtInt(m.ambiguousA)}, File B ${fmtInt(m.ambiguousB)}.</li>
+      </ul></div>`;
+      root.innerHTML=`<div class="movement-summary">
+        <div class="movement-card"><div class="mc-label">File A full headcount</div><div class="mc-value">${fmtInt(m.a.length)}</div><div class="mc-note">Complete opening snapshot</div></div>
+        <div class="movement-card exit"><div class="mc-label">Exit / Not in B</div><div class="mc-value">${fmtInt(m.exits.length)}</div><div class="mc-note">No confident identity match</div></div>
+        <div class="movement-card join"><div class="mc-label">Validated new joinees</div><div class="mc-value">${fmtInt(m.joiners.length)}</div><div class="mc-note">DOJ after A and by B snapshot</div></div>
+        <div class="movement-card net"><div class="mc-label">Historical unmatched</div><div class="mc-value">${fmtInt(m.historical.length)}</div><div class="mc-note">Not counted as new joinees</div></div>
+      </div>${analysis}<div class="viz" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h4 style="margin:0">Employee-level Tracking · Full comparison</h4><input id="movementSearch" class="movement-search" oninput="filterMovementList()" placeholder="Search employee name, code, department…"></div><div class="movement-tabs">
+        <button class="movement-tab active" data-tab="exits" onclick="setMovementTab('exits')">Exit / Not in B · ${fmtInt(m.exits.length)}</button>
+        <button class="movement-tab" data-tab="joiners" onclick="setMovementTab('joiners')">New in B · ${fmtInt(m.joiners.length)}</button>
+        <button class="movement-tab" data-tab="historical" onclick="setMovementTab('historical')">Historical unmatched · ${fmtInt(m.historical.length)}</button>
+        <button class="movement-tab" data-tab="matched" onclick="setMovementTab('matched')">Continuing · ${fmtInt(m.matches.length)}</button>
+      </div><div id="movementTableArea"></div></div>`;
+      filterMovementList();const modal=document.getElementById('movementModal');if(modal){modal.classList.add('open');modal.style.display='flex';modal.style.visibility='visible';modal.style.opacity='1';modal.style.zIndex='99999';}
+    }catch(e){console.error('Full movement audit failed',e);toast('Movement audit failed: '+(e.message||'unknown error'));}
+  };
+  window.filterMovementList=function(){const q=(document.getElementById('movementSearch')?.value||'').trim().toLowerCase(),type=window.__movementActiveTab||'exits';const rows=(__movementCache[type]||[]).filter(r=>!q||Object.values(r).some(v=>String(v==null?'':v).toLowerCase().includes(q)));const area=document.getElementById('movementTableArea');if(area)area.innerHTML=movementListMarkup(rows,type);};
+  window.setMovementTab=function(type){window.__movementActiveTab=type;document.querySelectorAll('#movementModal .movement-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===type));const i=document.getElementById('movementSearch');if(i)i.value='';filterMovementList();};
+
+  // Capture the entire scrollable target, not only its viewport; paginate the rendered canvas into A4 pages.
+  window.saveContentAsPDF=async function(targetId,title){
+    const target=document.getElementById(targetId);if(!target){toast('The page content is not available');return;}
+    if(!window.html2canvas||!window.jspdf){toast('PDF rendering libraries are unavailable');return;}
+    try{
+      toast('Preparing complete scrollable PDF…');
+      const clone=target.cloneNode(true);clone.id='wisFullPdfClone';
+      const width=Math.max(target.scrollWidth,target.clientWidth,900);
+      const host=document.createElement('div');host.style.cssText=`position:fixed;left:-20000px;top:0;width:${width}px;background:#fff;z-index:-1;overflow:visible;`;
+      clone.style.cssText+=`;width:${width}px!important;max-width:none!important;height:auto!important;max-height:none!important;overflow:visible!important;transform:none!important;zoom:1!important;`;
+      clone.querySelectorAll('*').forEach(el=>{el.style.maxHeight='none';if(getComputedStyle(el).overflowY==='auto'||getComputedStyle(el).overflowY==='scroll'||getComputedStyle(el).overflow==='hidden')el.style.overflow='visible';if(el.classList.contains('tbl-wrap')){el.style.height='auto';el.style.maxHeight='none';el.style.overflow='visible';}});
+      clone.querySelectorAll('button,.compare-focus-toolbar,.no-print').forEach(el=>el.remove());
+      host.appendChild(clone);document.body.appendChild(host);
+      await new Promise(r=>setTimeout(r,250));
+      const canvas=await html2canvas(clone,{scale:1.5,backgroundColor:'#ffffff',useCORS:true,logging:false,width:width*1.5,windowWidth:Math.max(window.innerWidth,width),onclone:doc=>{const c=doc.getElementById('wisFullPdfClone');if(c){c.style.height='auto';c.style.maxHeight='none';c.style.overflow='visible';c.querySelectorAll('*').forEach(el=>{el.style.maxHeight='none';if(el.classList.contains('tbl-wrap')){el.style.height='auto';el.style.overflow='visible';}});}}});
+      host.remove();
+      const {jsPDF}=window.jspdf,pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
+      const margin=8,pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight(),usableW=pageW-margin*2,usableH=pageH-margin*2;
+      const sliceH=Math.floor(canvas.width*usableH/usableW);let y=0,page=0;
+      while(y<canvas.height){const h=Math.min(sliceH,canvas.height-y),part=document.createElement('canvas');part.width=canvas.width;part.height=h;part.getContext('2d').drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);if(page>0)pdf.addPage();const imgH=h*usableW/canvas.width;pdf.addImage(part.toDataURL('image/jpeg',.94),'JPEG',margin,margin,usableW,imgH,undefined,'FAST');y+=h;page++;}
+      const safe=String(title||'Workforce_Report').replace(/[^a-z0-9_-]+/gi,'_');pdf.save(`${safe}_Complete.pdf`);toast(`Complete PDF saved · ${page} page(s)`);
+    }catch(e){console.error('Full PDF export failed',e);document.getElementById('wisFullPdfClone')?.parentElement?.remove();toast('Full PDF export failed: '+(e.message||'unknown error'));}
+  };
+})();
+
+
+/* Repaired placement: keep the precision correction executable inside the document script. */
+(function(){
+  const css=document.createElement('style');
+  css.textContent=`
+    #wisRecruitChartModal{z-index:2147483000!important;padding:10px!important}
+    #wisRecruitChartModal .wis-chart-shell{width:100%!important;height:100%!important;max-width:none!important}
+    #wisRecruitChartModal .wis-chart-body{overflow:auto!important;min-width:0!important}
+    #wisRecruitChartModal .wis-chart-body svg{display:block!important;width:100%!important;min-width:1100px!important;height:auto!important;max-height:none!important}
+    .wis-recruit-enlarge{display:inline-flex!important;position:relative!important;z-index:5!important;margin:5px 0 10px!important}
+    #profileModal.wis-movement-exit-profile:after,#profileModal.wis-movement-join-profile:after{content:attr(data-wis-stamp);position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-45deg);font-size:clamp(38px,7vw,82px);font-weight:900;letter-spacing:5px;white-space:nowrap;pointer-events:none;z-index:2147482000;opacity:.30;color:var(--wis-stamp-color,#b42318);text-shadow:0 1px 1px #fff}
+    #profileModal.wis-movement-join-profile{--wis-stamp-color:#16834a}
+    #profileModal.wis-movement-exit-profile{--wis-stamp-color:#b42318}
+    #profileModal .profile-box{position:relative}
+    #profileModal .wis-movement-status{margin:12px 0;padding:12px 16px;border:1px solid #d7dee8;border-left:5px solid #b42318;border-radius:9px;background:#f8fafc;font-weight:800;letter-spacing:.5px}
+    #profileModal.wis-movement-join-profile .wis-movement-status{border-left-color:#16834a}
+    .wis-movement-method-note{font-size:12px;color:#526174;margin-top:8px}
+    .wis-pdf-export-clone,.wis-pdf-export-clone *{box-sizing:border-box!important}
+    .wis-pdf-export-clone{background:#fff!important;color:#172033!important}
+    .wis-pdf-export-clone .compare-pane,.wis-pdf-export-clone .viz,.wis-pdf-export-clone .tbl-wrap{height:auto!important;max-height:none!important;overflow:visible!important;break-inside:auto!important}
+    .wis-pdf-export-clone table{width:100%!important;border-collapse:collapse!important}
+    .wis-pdf-export-clone tr{break-inside:avoid!important}
+  `;
+  document.head.appendChild(css);
+
+  // Full-screen chart: inject the control into every matching chart, including comparison panes.
+  function findRecruitCharts(root=document){
+    const charts=[];if(root.matches?.('.viz'))charts.push(root);charts.push(...root.querySelectorAll('.viz'));
+    charts.forEach(v=>{
+      const h=v.querySelector('h4');
+      if(!h||!/Channel Usage Over Joining Years/i.test(h.textContent)||v.querySelector('.wis-recruit-enlarge'))return;
+      const b=document.createElement('button');b.type='button';b.className='btn ghost sm wis-recruit-enlarge';b.textContent='⛶ View full screen';
+      h.insertAdjacentElement('afterend',b);
+    });
+  }
+  window.openWisRecruitChart=function(btn){
+    const viz=btn?.closest('.viz');if(!viz){toast('The recruitment chart could not be located in this view.');return;}
+    const svg=viz.querySelector('svg');if(!svg){toast('The recruitment chart has not finished rendering.');return;}
+    let modal=document.getElementById('wisRecruitChartModal');
+    if(!modal){modal=document.createElement('div');modal.id='wisRecruitChartModal';modal.innerHTML=`<div class="wis-chart-shell"><div class="wis-chart-head"><div><b>Channel Usage Over Joining Years</b><div class="small-muted">Full-screen chart · scroll to inspect all joining years and channels</div></div><button type="button" class="btn ghost" id="wisRecruitChartClose">Close ✕</button></div><div class="wis-chart-body" id="wisRecruitChartBody"></div></div>`;document.body.appendChild(modal);modal.addEventListener('click',e=>{if(e.target===modal)window.closeWisRecruitChart();});modal.querySelector('#wisRecruitChartClose').addEventListener('click',window.closeWisRecruitChart);}
+    const body=modal.querySelector('#wisRecruitChartBody');body.innerHTML='';
+    const clone=svg.cloneNode(true);const vb=svg.getAttribute('viewBox');
+    if(vb){const parts=vb.split(/[ ,]+/).map(Number);if(parts.length===4&&parts.every(Number.isFinite)){clone.setAttribute('width',Math.max(1200,parts[2]));clone.setAttribute('height',Math.max(520,parts[3]));}}
+    clone.style.cssText='display:block;width:max(100%,1200px);height:auto;max-width:none;max-height:none;';body.appendChild(clone);
+    const legend=viz.querySelector('.legend');if(legend){const l=legend.cloneNode(true);l.style.cssText='display:flex;flex-wrap:wrap;gap:12px 20px;padding:18px 8px;';body.appendChild(l);}
+    modal.classList.add('open');modal.style.display='flex';document.body.style.overflow='hidden';
+  };
+  window.closeWisRecruitChart=function(){const m=document.getElementById('wisRecruitChartModal');if(m){m.classList.remove('open');m.style.display='none';}document.body.style.overflow='';};
+  document.addEventListener('click',e=>{const b=e.target.closest('.wis-recruit-enlarge');if(b){e.preventDefault();e.stopPropagation();window.openWisRecruitChart(b);}},true);
+  findRecruitCharts();
+  const chartObserver=new MutationObserver(records=>{for(const r of records){for(const n of r.addedNodes){if(n.nodeType===1)findRecruitCharts(n);}}});
+  chartObserver.observe(document.body,{childList:true,subtree:true});
+
+  // Matching utilities. Employee Code is preferred, but generated R1/R2 placeholders are ignored.
+  const clean=v=>String(v==null?'':v).normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+  function realEmployeeCode(r){const c=clean(r?.Code);return c&&!/^r\d+$/.test(c)?c:'';}
+  function movementDate(r,key){let d=r?._x?.[key];if(d instanceof Date&&!isNaN(d))return d;let v=r?.[key];if(v instanceof Date&&!isNaN(v))return v;if(v==null||v==='')return null;if(typeof v==='number'&&v>20000&&v<80000)return new Date(Date.UTC(1899,11,30)+v*86400000);let z=String(v).trim(),m=z.match(/^(\d{1,2})[/.\-](\d{1,2})[/.\-](\d{4})$/);if(m){let a=+m[1],b=+m[2],y=+m[3],day=a,month=b;if(a<=12&&b>12){month=a;day=b;}const q=new Date(y,month-1,day);return q.getFullYear()===y&&q.getMonth()===month-1&&q.getDate()===day?q:null;}m=z.match(/^(\d{4})[/.\-](\d{1,2})[/.\-](\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);const q=new Date(z);return isNaN(q)?null:q;}
+  const dateKey=(r,k)=>{const d=movementDate(r,k);return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`:'';};
+  const empName=r=>clean(r?.Name);
+  const group=(rows,keyFn)=>{const m=new Map();rows.forEach((r,i)=>{const k=keyFn(r);if(k){if(!m.has(k))m.set(k,[]);m.get(k).push(i);}});return m;};
+  function calculateTwoWayMovement(){
+    const A=S.compareData?.a?.rows||[],B=S.compareData?.b?.rows||[];const usedA=new Set(),usedB=new Set(),matches=[];
+    const matchUnique=(mapA,mapB,method,allowDOBMismatch=false)=>{
+      for(const [k,ais] of mapA){const bis=mapB.get(k)||[];const aa=ais.filter(i=>!usedA.has(i)),bb=bis.filter(i=>!usedB.has(i));if(aa.length!==1||bb.length!==1)continue;const ar=A[aa[0]],br=B[bb[0]];const ad=dateKey(ar,'DOB'),bd=dateKey(br,'DOB');if(!allowDOBMismatch&&ad&&bd&&ad!==bd)continue;usedA.add(aa[0]);usedB.add(bb[0]);matches.push({a:ar,b:br,method});}
+    };
+    // Stage 1: unique, real employee code.
+    matchUnique(group(A,realEmployeeCode),group(B,realEmployeeCode),'Employee Code',true);
+    // Stage 2: stable personal identity; allows code changes and date-format differences.
+    matchUnique(group(A,r=>{const n=empName(r),d=dateKey(r,'DOB');return n&&d?`ND:${n}|${d}`:'';}),group(B,r=>{const n=empName(r),d=dateKey(r,'DOB');return n&&d?`ND:${n}|${d}`:'';}),'Name + DOB',true);
+    // Stage 3: institutional DOJ when DOB is absent from at least one snapshot.
+    matchUnique(group(A,r=>{const n=empName(r),d=dateKey(r,'DOJ');return n&&d?`NJ:${n}|${d}`:'';}),group(B,r=>{const n=empName(r),d=dateKey(r,'DOJ');return n&&d?`NJ:${n}|${d}`:'';}),'Name + DOJ',true);
+    // Stage 4: unique name across the remaining population, provided available DOB/DOJ do not conflict.
+    const remA= A.map((r,i)=>({r,i})).filter(x=>!usedA.has(x.i));const remB=B.map((r,i)=>({r,i})).filter(x=>!usedB.has(x.i));
+    const na=group(remA.map(x=>x.r),empName),nb=group(remB.map(x=>x.r),empName);
+    for(const [n,aiLocal] of na){const biLocal=nb.get(n)||[];if(aiLocal.length!==1||biLocal.length!==1)continue;const ax=remA[aiLocal[0]],bx=remB[biLocal[0]],ad=dateKey(ax.r,'DOB'),bd=dateKey(bx.r,'DOB'),aj=dateKey(ax.r,'DOJ'),bj=dateKey(bx.r,'DOJ');if(ad&&bd&&ad!==bd)continue;if(aj&&bj&&aj!==bj)continue;usedA.add(ax.i);usedB.add(bx.i);matches.push({a:ax.r,b:bx.r,method:'Unique employee name (dates consistent)'});}
+    const exits=A.map((r,i)=>({r,i})).filter(x=>!usedA.has(x.i)).map(x=>({...x.r,__movementType:'exits',__movementReason:'Present in File A; no matching employee record found in File B'}));
+    const joiners=B.map((r,i)=>({r,i})).filter(x=>!usedB.has(x.i)).map(x=>({...x.r,__movementType:'joiners',__movementReason:'Present in File B; no matching employee record found in File A'}));
+    return {a:A,b:B,exits,joiners,matches};
+  }
+
+  // Movement-specific profile context. The regular employee 360 profile is left unchanged.
+  const baseShowProfile=showProfile;
+  window.openMovementEmployee=function(type,index){
+    const rows=__movementCache[type]||[];const row=rows[Number(index)];if(!row){toast('Employee record not found in the current movement list.');return;}
+    const mm=document.getElementById('movementModal');if(mm){mm.classList.remove('open');mm.style.display='none';}
+    baseShowProfile(row);
+    const pm=document.getElementById('profileModal');if(!pm)return;
+    pm.classList.remove('wis-movement-exit-profile','wis-movement-join-profile');
+    const exiting=type==='exits';pm.classList.add(exiting?'wis-movement-exit-profile':'wis-movement-join-profile');pm.dataset.wisStamp=exiting?'NOT IN SERVICE':'NEW JOINEE';
+    const content=document.getElementById('profileContent');if(!content)return;
+    content.querySelector('.profile-kpis')?.remove();
+    content.querySelector('.profile-timeline')?.closest('.profile-sect')?.remove();
+    content.querySelector('.profile-badges')?.closest('.profile-sect')?.remove();
+    [...content.querySelectorAll('.profile-sect')].forEach(sec=>{const h=sec.querySelector('.profile-sect-h');if(h&&/Derived Metrics|Risk & Status Indicators/i.test(h.textContent))sec.remove();});
+    const header=content.querySelector('.profile-header');if(header){const stamp=document.createElement('div');stamp.className='wis-movement-status';stamp.textContent=exiting?'NOT IN SERVICE · Employee present in File A, absent in File B':'NEW JOINEE · Employee present in File B, absent in File A';header.insertAdjacentElement('afterend',stamp);}
+  };
+  const baseCloseProfile=closeProfile;
+  window.closeProfile=function(){const pm=document.getElementById('profileModal');if(pm){pm.classList.remove('wis-movement-exit-profile','wis-movement-join-profile');delete pm.dataset.wisStamp;}baseCloseProfile();};
+
+  function renderMovementRows(rows,type){
+    if(!rows.length)return `<div class="empty">No employees found in this category.</div>`;
+    const cols=['Code','Name','Designation','Department','Grade','DOJ'];const css=type==='exits'?'wis-exits':'wis-joiners';
+    return `<div class="movement-list ${css}"><table class="dt"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}<th>Profile</th></tr></thead><tbody>${rows.map(r=>{const idx=(__movementCache[type]||[]).indexOf(r),d=movementDate(r,'DOJ');return `<tr><td>${esc(r.Code||'—')}</td><td><b>${esc(r.Name||'—')}</b></td><td>${esc(r.Designation||'—')}</td><td>${esc(r.Department||'—')}</td><td>${esc(r.Grade||'—')}</td><td>${d?dateStr(d):'—'}</td><td><button type="button" class="btn ghost sm wis-movement-profile" data-movement-type="${type}" data-movement-index="${idx}">360° Profile</button></td></tr>`;}).join('')}</tbody></table></div>`;
+  }
+  window.openMovementTracker=function(){
+    try{
+      if(!S.compareData?.a?.rows||!S.compareData?.b?.rows){toast('Load both File A and File B in Compare mode first.');return;}
+      const m=calculateTwoWayMovement();__movementCache={exits:m.exits,joiners:m.joiners};window.__movementActiveTab='exits';
+      const root=document.getElementById('movementContent');if(!root)return;
+      const matched=m.matches.length,net=m.b.length-m.a.length;
+      const counts={code:m.matches.filter(x=>x.method==='Employee Code').length,dob:m.matches.filter(x=>x.method==='Name + DOB').length,doj:m.matches.filter(x=>x.method==='Name + DOJ').length,name:m.matches.filter(x=>x.method.startsWith('Unique employee name')).length};
+      root.innerHTML=`<div class="movement-summary">
+        <div class="movement-card"><div class="mc-label">File A headcount</div><div class="mc-value">${fmtInt(m.a.length)}</div><div class="mc-note">Complete File A snapshot</div></div>
+        <div class="movement-card exit"><div class="mc-label">Exit / Not in B</div><div class="mc-value">${fmtInt(m.exits.length)}</div><div class="mc-note">Present in A, absent in B</div></div>
+        <div class="movement-card join"><div class="mc-label">New in B</div><div class="mc-value">${fmtInt(m.joiners.length)}</div><div class="mc-note">Present in B, absent in A</div></div>
+        <div class="movement-card net"><div class="mc-label">Continuing employees</div><div class="mc-value">${fmtInt(matched)}</div><div class="mc-note">Matched across both files</div></div>
+      </div>
+      <div class="insights" style="margin-top:12px"><h4>◆ Complete File-to-File Reconciliation</h4><ul>
+        <li>Compared every record in File A (<b>${fmtInt(m.a.length)}</b>) with every record in File B (<b>${fmtInt(m.b.length)}</b>); dashboard filters are not applied.</li>
+        <li>Matched <b>${fmtInt(matched)}</b> continuing employees: ${fmtInt(counts.code)} by employee code, ${fmtInt(counts.dob)} by name + DOB, ${fmtInt(counts.doj)} by name + DOJ, and ${fmtInt(counts.name)} by unique name with consistent available dates.</li>
+        <li><b>${fmtInt(m.exits.length)}</b> employees occur only in File A; <b>${fmtInt(m.joiners.length)}</b> occur only in File B.</li>
+        <li>Reconciliation check: File A = exits + continuing (${fmtInt(m.exits.length)} + ${fmtInt(matched)} = ${fmtInt(m.exits.length+matched)}); File B = new in B + continuing (${fmtInt(m.joiners.length)} + ${fmtInt(matched)} = ${fmtInt(m.joiners.length+matched)}).</li>
+        <li>Net headcount movement: <b>${net>=0?'+':''}${fmtInt(net)}</b>. A long-serving employee appearing in both files is treated as continuing, not a new joinee, even if their employee code has changed, provided the identity fields reconcile.</li>
+      </ul><div class="wis-movement-method-note">Matching order: genuine employee code → name + DOB → name + institutional DOJ → unique name with no conflicting available dates. Ambiguous duplicate names are not force-matched.</div></div>
+      <div class="viz" style="margin-top:14px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h4 style="margin:0">Employee-level Tracking</h4><input id="movementSearch" class="movement-search" oninput="filterMovementList()" placeholder="Search employee name, code, department…"></div><div class="movement-tabs">
+        <button class="movement-tab active" data-tab="exits" onclick="setMovementTab('exits')">Exit / Not in B · ${fmtInt(m.exits.length)}</button>
+        <button class="movement-tab" data-tab="joiners" onclick="setMovementTab('joiners')">New in B · ${fmtInt(m.joiners.length)}</button>
+      </div><div id="movementTableArea"></div></div>`;
+      window.filterMovementList();const modal=document.getElementById('movementModal');if(modal){modal.classList.add('open');modal.style.display='flex';modal.style.visibility='visible';modal.style.opacity='1';modal.style.zIndex='99999';}
+    }catch(e){console.error('Movement reconciliation failed',e);toast('Movement comparison failed: '+(e.message||'unknown error'));}
+  };
+  window.filterMovementList=function(){const q=(document.getElementById('movementSearch')?.value||'').trim().toLowerCase(),type=window.__movementActiveTab||'exits';const rows=(__movementCache[type]||[]).filter(r=>!q||Object.values(r).some(v=>String(v==null?'':v).toLowerCase().includes(q)));const area=document.getElementById('movementTableArea');if(area)area.innerHTML=renderMovementRows(rows,type);};
+  window.setMovementTab=function(type){if(!['exits','joiners'].includes(type))return;window.__movementActiveTab=type;document.querySelectorAll('#movementModal .movement-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===type));const i=document.getElementById('movementSearch');if(i)i.value='';window.filterMovementList();};
+  document.addEventListener('click',e=>{const b=e.target.closest('#movementModal .wis-movement-profile');if(b){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();window.openMovementEmployee(b.dataset.movementType,b.dataset.movementIndex);}},true);
+
+  // Multi-page A4 export: expand every nested scroll region before rasterising, then paginate at physical page ratio.
+  window.saveContentAsPDF=async function(targetId,title){
+    const target=document.getElementById(targetId);if(!target){toast('The page content is not available');return;}if(!window.html2canvas||!window.jspdf){toast('PDF rendering libraries are unavailable');return;}
+    let host;
+    try{
+      toast('Preparing full-size, multi-page PDF…');
+      const width=Math.max(target.scrollWidth,target.clientWidth,1000);
+      host=document.createElement('div');host.style.cssText=`position:fixed;left:-30000px;top:0;width:${width}px;background:#fff;z-index:-1;overflow:visible;`;
+      const clone=target.cloneNode(true);clone.id='wisFullPdfClone';clone.classList.add('wis-pdf-export-clone');clone.style.cssText+=`;display:block!important;position:static!important;box-sizing:border-box!important;width:${width}px!important;min-width:${width}px!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;transform:none!important;zoom:1!important;`;
+      clone.querySelectorAll('button,.compare-focus-toolbar,.tile-badge,.tile-resize,.tile-delete,.tile-duplicate,.tile-crop,.no-print,.close-x').forEach(el=>el.remove());
+      clone.querySelectorAll('*').forEach(el=>{el.style.maxHeight='none';el.style.minHeight='0';el.style.height='auto';el.style.overflow='visible';el.style.position='static';el.style.transform='none';if(el.matches('svg')){el.style.maxWidth='100%';el.style.height='auto';}if(el.classList.contains('tbl-wrap')){el.style.width='100%';el.style.maxWidth='none';}});
+      host.appendChild(clone);document.body.appendChild(host);
+      await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+      const cssHeight=Math.max(clone.scrollHeight,clone.offsetHeight,clone.getBoundingClientRect().height,1200);
+      const canvas=await html2canvas(clone,{scale:1.35,backgroundColor:'#ffffff',useCORS:true,logging:false,width:width,height:cssHeight,windowWidth:width,windowHeight:cssHeight,scrollX:0,scrollY:0});
+      host.remove();host=null;
+      const {jsPDF}=window.jspdf;const landscape=(canvas.width/canvas.height)>1.25;
+      const pdf=new jsPDF({orientation:landscape?'landscape':'portrait',unit:'mm',format:'a4',compress:true});
+      const margin=8,pageW=pdf.internal.pageSize.getWidth(),pageH=pdf.internal.pageSize.getHeight(),usableW=pageW-2*margin,usableH=pageH-2*margin;
+      const sliceH=Math.max(1,Math.floor(canvas.width*usableH/usableW));let y=0,page=0;
+      while(y<canvas.height){const h=Math.min(sliceH,canvas.height-y);const part=document.createElement('canvas');part.width=canvas.width;part.height=h;const ctx=part.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,part.width,part.height);ctx.drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);if(page>0)pdf.addPage();const imageHeight=(h/canvas.width)*usableW;pdf.addImage(part.toDataURL('image/jpeg',.95),'JPEG',margin,margin,usableW,imageHeight,undefined,'FAST');y+=h;page++;}
+      const safe=String(title||'Workforce_Report').replace(/[^a-z0-9_-]+/gi,'_');pdf.save(`${safe}_Full_Report.pdf`);toast(`Full-size PDF saved · ${page} A4 page(s)`);
+    }catch(e){console.error('Multi-page PDF export failed',e);toast('PDF export failed: '+(e.message||'unknown error'));}finally{if(host)host.remove();}
+  };
+})();
+
 </script>
 </body>
 </html>
